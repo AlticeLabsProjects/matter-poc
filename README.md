@@ -12,7 +12,10 @@ Commissioning and control with Altice Home App
 
 ## Remote control
 
-Show remote control of Matter Assistant with Altice Home
+Show remote control of Matter Assistant with Altice Home:
+
+- simpler solution but less secure: https://www.home-assistant.io/docs/configuration/remote/
+- nabu casa solution: https://www.nabucasa.com/config/remote/ (GPL3)
 
 ## Customer Care portal
 
