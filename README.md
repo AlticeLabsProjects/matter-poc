@@ -1,4 +1,4 @@
-# home-assistant-poc
+# Matter PoC
 
 PoC Objectives
 
