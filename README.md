@@ -1,21 +1,65 @@
 # Matter PoC
 
+Check https://www.youtube.com/watch?v=PsNdR-m5pwE and try to show similar if possible with Tuya and EVE Matter devices. List devices to purchase. Show interoperability between Google Home and Homekit.
+
 PoC Objectives
 
-## Matter
+## Devices and Matter clusters
 
-Check https://www.youtube.com/watch?v=PsNdR-m5pwE and try to show similar if possible with Tuya and EVE Matter devices. List devices to purchase. Show interoperability between Google Home and Homekit.
+- WiFi Tuya devices (lights): check Tuya Cloud is not used
+- Thread Tuya devices (motion sensors): check Tuya Cloud is not used
+- Nanoleaf Lights
+- ESP32 based devices
+- Matter Controller @ Matter Hub (Dusun)
+- Matter Controller @ FiberGW (Pi4 emulating FiberGW)
 
 ## Mobile App integration
 
 Commissioning and control with Altice Home App
 
+## Local control
+
+Show local control, Mobile App directly interfaces with Matter Controller withou using Cloud back-end 
+
 ## Remote control
 
-Show remote control of Matter Assistant with Altice Home:
+Show remote control with Altice Home
 
-- simpler solution but less secure: https://www.home-assistant.io/docs/configuration/remote/
-- nabu casa solution: https://www.nabucasa.com/config/remote/ (GPL3)
+## Altice Home + Google Home multi-admin
+
+**scenario 1**
+- commissioning to Altice Fabric
+- share to Google Home
+- concurrent control with Altice Home & Google Home
+
+**scenario 2**
+- commissioning to Google Home 
+- share to Altice Fabric
+- concurrent control with Altice Home & Google Home
+
+## Altice Home + Apple Home multi-admin
+
+**scenario 1**
+- commissioning to Altice Fabric
+- share to Apple Home
+- concurrent control with Altice Home & Apple Home
+
+**scenario 2**
+- commissioning to Apple Home 
+- share to Altice Fabric
+- concurrent control with Altice Home & Apple Home
+
+## Altice Home + Home Assistant multi-admin
+
+**scenario 1**
+- commissioning to Altice Fabric
+- share to Home Assistant
+- concurrent control with Altice Home & Home Assistant
+
+**scenario 2**
+- commissioning to Home Assistant
+- share to Altice Fabric
+- concurrent control with Altice Home & Home Assistant
 
 ## Customer Care portal
 
