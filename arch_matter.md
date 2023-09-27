@@ -10,7 +10,45 @@
 
 ### Matter Controller functionalities
 
+- Matter devices management
+- Matter OTA
+- Matter bridges
+- ...
+
 ### Matter App functionalities
+
+- Commissioning
+- 
+
+### Management functionalities
+
+- Customer / Home provisioning
+- Services provisioning
+- Customer / Home profile incl settings
+- CI/CD
+- Firmware management
+- Analytics
+- ...
+
+### Control functionalities
+
+- Automation
+- Devices control
+- Devices status monitoring
+- Devices events handler
+- Notifications eg push notification, email, SMS, ...
+- Non-Matter integrations e.g. Tuya
+- ...
+
+
+### Security functionalities
+
+- Zone management
+- arm delays settings
+- arm / disarm
+- Alarms
+- ...
+
 
 
 ## Matter Arch with HomeBot (mid step)
