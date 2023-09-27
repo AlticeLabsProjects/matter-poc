@@ -1,7 +1,20 @@
-## Matter Architecture
+# Matter Architecture
+
+## Target
 
 - the Mobile App should use local interfaces when the mobile phone is connected to the local residential network
 - the API used in the local interface should be the same as the one used for remote control ie the mobile phone is not connected to the local residential network
+
+![](High-Level-arch.png)
+
+
+### Matter Controller functionalities
+
+### Matter App functionalities
+
+
+## Matter Arch with HomeBot (mid step)
+
 
 ![](Matter%20with%20HomeBot.png)
 
