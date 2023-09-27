@@ -1,15 +1,13 @@
-# Matter PoC
+# Matter PoC Objetives
 
 Check https://www.youtube.com/watch?v=PsNdR-m5pwE and try to show similar if possible with Tuya and EVE Matter devices. List devices to purchase. Show interoperability between Google Home and Homekit.
-
-PoC Objectives
 
 ## Devices and Matter clusters
 
 - WiFi Tuya devices (lights): check Tuya Cloud is not used
 - Thread Tuya devices (motion sensors): check Tuya Cloud is not used
 - Nanoleaf Lights
-- Aqara P2 Contact Sensor
+- Aqara P2 Contact Sensor (Thread)
 - Switch Bot temperature / humidity sensor
 - TP Link Tapo Switch
 - ESP32 based devices
