@@ -9,6 +9,9 @@ PoC Objectives
 - WiFi Tuya devices (lights): check Tuya Cloud is not used
 - Thread Tuya devices (motion sensors): check Tuya Cloud is not used
 - Nanoleaf Lights
+- Aqara P2 Contact Sensor
+- Switch Bot temperature / humidity sensor
+- TP Link Tapo Switch
 - ESP32 based devices
 - Matter Controller @ Matter Hub (Dusun)
 - Matter Controller @ FiberGW (Pi4 emulating FiberGW)
