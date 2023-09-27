@@ -4,9 +4,10 @@ Check https://www.youtube.com/watch?v=PsNdR-m5pwE and try to show similar if pos
 
 ## Devices and Matter clusters
 
-- WiFi Tuya devices (lights): check Tuya Cloud is not used
-- Thread Tuya devices (motion sensors): check Tuya Cloud is not used
+- WiFi Tuya devices (lights, plugs): check Tuya Cloud is not used
+- Thread Tuya devices (motion, contact sensors): check Tuya Cloud is not used
 - Nanoleaf Lights
+- Eve Plug (Thread)
 - Aqara P2 Contact Sensor (Thread)
 - Switch Bot temperature / humidity sensor
 - TP Link Tapo Switch
