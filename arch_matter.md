@@ -16,6 +16,7 @@
 
 - Mobile App as Matter node playing controller role overlapping with resident Matter Controller?
 - Local control using native Matter primitives where Mobile would use different APIs for remote and local control?
+- How to provide technical support if the Controller is hosted at the end-user device? How is it done today with FiberGW / STBs?
 - Transport protocol to be used for control:
   - WSS
   - MQTT
