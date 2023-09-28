@@ -60,15 +60,15 @@
 - Analytics
 - ...
 
-
-
-
+**[Management API functionalities](management_api.md)**
 
 
 ## Matter Arch with HomeBot (mid step)
 
 
 ![](Matter%20with%20HomeBot.png)
+
+To simplify integration with HomeBot we should consider skip Matter Local control
 
 **HomeBot features**
 
@@ -95,4 +95,10 @@ Functionalities that are currently provided by HomeBot:
 
 **Manager**
 
+tbd
 
+## Migration Strategy
+
+Avoid maintenance of duplicated components eg Mobile App. As soon as (target) Matter App is released, legacy will not evolve. End-users will have to upgrade to the new App to benefit of new Matter features and devices
+
+![](migration-strategy1.png)
