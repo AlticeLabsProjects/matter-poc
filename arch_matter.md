@@ -12,6 +12,15 @@
 
 ![](High-Level-arch.png)
 
+**Open Questions**
+
+- Mobile App as Matter node playing controller role overlapping with resident Matter Controller?
+- Local control using native Matter primitives where Mobile would use different APIs for remote and local control?
+- Transport protocol to be used for control:
+  - WSS
+  - MQTT
+  - Others?
+
 ### Controlling functionalities
 
 #### Basic Matter Controller
