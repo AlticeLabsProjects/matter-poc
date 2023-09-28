@@ -4,50 +4,64 @@
 
 - the Mobile App should use local interfaces when the mobile phone is connected to the local residential network 
 - the API used in the local interface should be the same as the one used for remote control ie the mobile phone is not connected to the local residential network
+- the management functionalities (e.g. user and services provisioning) should be as much as possible hosted in the cloud back-end
+- the control functionalities (send commands to devices, status monitoring, devices events handling, apps, ..) should be as much as possible hosted in the local Matter network
+- if the hosting device like the FiberHW has not enough computational resources, some controlling  functionalities are hosted in the Cloud - **enablers and apps** functionalities. Mandatory functionalities to be in the local host - **basic controller** - should provide Matter Controller autonomy to work without the Cloud for more frequent use cases. 
+- The software components implementing controlling functionalities should be the same independently of the hosting device: FiberGW, MatterHub, Cloud Server
+-  
 
 ![](High-Level-arch.png)
 
+### Controlling functionalities
 
-### Matter Controller functionalities
+#### Basic Matter Controller
 
-- Matter devices management
+- Matter devices registration
 - Matter OTA
 - Matter bridges
 - ...
 
-### Matter App functionalities
+#### Matter App enablers
 
-- Commissioning
-- 
-
-### Management functionalities
-
-- Customer / Home provisioning
-- Services provisioning
-- Customer / Home profile incl settings
-- CI/CD
-- Firmware management
-- Analytics
-- ...
-
-### Control functionalities
-
+- Matter relay
 - Automation
 - Devices control
 - Devices status monitoring
 - Devices events handler
 - Notifications eg push notification, email, SMS, ...
-- Non-Matter integrations e.g. Tuya
+- Non-Matter integrations e.g. Tuya, Shelly, ...
 - ...
 
-
-### Security functionalities
+#### Security App
 
 - Zone management
 - arm delays settings
 - arm / disarm
 - Alarms
 - ...
+
+#### Mobile App functionalities
+
+- Devices Commissioning
+- Control UI
+- Management UI
+- ...
+
+### Management functionalities
+
+- Customer / Home provisioning
+- Services provisioning
+- Customer / Home profile management incl notification settings, language, home users
+- Customer Care
+- Authentication & Authorisation
+- Matter Controller backup management
+- CI/CD
+- Firmware management
+- Analytics
+- ...
+
+
+
 
 
 
