@@ -18,6 +18,8 @@ CONS
 
 - more resources spent locally, more expensive controllers
 - AI based intelligence needs lots of computing resources
+- Ask authorisation for remote access to debug local system
+- more challenging to be proactive on local failures
 
 
   
