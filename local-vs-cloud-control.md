@@ -1,6 +1,6 @@
-## Local control vs Cloud control
+# Local control vs Cloud control
 
-PROS
+PROS Local / CONS Cloud
 
 - more privacy friendly (personal data not transferred to Cloud)
 - responsive system with lower latency in devices communication
@@ -14,14 +14,18 @@ PROS
 - More secure (?)
 - less cloud resources spent
 
-CONS
+CONS Local / PROS Cloud
 
 - more resources spent locally, more expensive controllers
 - AI based intelligence needs lots of computing resources
 - Ask authorisation for remote access to debug local system
 - more challenging to be proactive on local failures
 
+### Challenges
 
+- If we need Backup of the Controller data / status isn't it breaking privacy?
+- How to debug an issue with local automation?
+  - solution: provide an API to export Logs to customer care
   
 ### references
 
