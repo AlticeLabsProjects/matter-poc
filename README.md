@@ -2,6 +2,8 @@
 
 Check https://www.youtube.com/watch?v=PsNdR-m5pwE and try to show similar if possible with Tuya and EVE Matter devices. List devices to purchase. Show interoperability between Google Home and Homekit.
 
+![](poc-arch.png)
+
 ## Devices and Matter clusters
 
 - WiFi Tuya devices (lights, plugs): check Tuya Cloud is not used
