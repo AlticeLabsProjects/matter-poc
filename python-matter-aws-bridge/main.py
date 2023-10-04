@@ -1,120 +1,237 @@
+from attr import attributes
 import websocket
-import paho.mqtt.client as mqtt
-import ssl
 import json
 import source.aws.client as aws
-
-x = aws.Client(
-    endpoint="a2qzw5m91hzbht-ats.iot.eu-west-3.amazonaws.com",
-    client_id="1234",
-    certificate_id="9cc3bb6c2f624ca25e4589083b30641863ab4be25ff3be1cc6da6670ea92d694",
-)
-
-def connected():
-    print("connected")
-
-x.connect(connected)
-
-exit()
-
-from chip.clusters.ClusterObjects import (
-    ALL_ATTRIBUTES,
-    ALL_CLUSTERS,
-    Cluster,
-)
-from chip.clusters import Objects as clusters
-from chip.clusters.ClusterObjects import ClusterCommand
+import source.matter.normalizer as matter_normalizer
+import requests
 
 broker_address = "ci.altice-home.cloud"
 broker_port = 1883
 topic = "/test"
 username = "events-altice-dev:admin"
 password = "admin"
+nodes = {}
 message_id = 1
-
-mqtt_client = mqtt.Client()
-
-
-def on_mqtt_message(client, userdata, message):
-    payload = message.payload.decode("utf-8")
-
-    if payload:
-        json_payload = json.loads(payload)
-
-        if "command" in json_payload and json_payload["command"] == "device_command":
-            websocket_client.send(payload)
+messages = {}
 
 
-def on_websocket_message(client, message):
-    payload = message.payload.decode("utf-8")
-
-    if payload:
-        json_payload = json.loads(payload)
-
-        if "event" in json_payload and json_payload["event"] == "attribute_updated":
-            mqtt_client.publish(topic, message)
+def node_id_from_key(node_key):
+    return next(iter([node_id for node_id in nodes if nodes[node_id] == node_key]))
 
 
-def on_websocket_open(client):
-    start_listening()
+def on_aws_updated(node_key, values):
+    print(values)
 
 
-def send_websocker_message(message):
+def on_aws_getted(node_key, values):
+    print(values)
+
+
+def on_aws_deleted(node_key, values):
     global message_id
 
-    websocket_client.send(json.dumps({**{"message_id": str(message_id)}, **message}))
+    node_id = node_id_from_key(node_key)
+
+    messages.update(
+        {
+            message_id: {node_key: node_key, attributes: attributes},
+        }
+    )
+
+    send_websocker_message(
+        "remove_node",
+        str(message_id),
+        args={"node_id": node_id},
+    )
 
     message_id += 1
 
 
-def start_listening():
-    send_websocker_message({"command": "start_listening"})
+def on_aws_delta_updated(node_key, delta):
+    try:
+        node_id = node_id_from_key(node_key)
 
-
-def send_command(node_id, cluster_id, command_id):
-    send_websocker_message({"command": "start_listening"})
-
-
-def get_class_by_attribute_value(obj, attribute_name: str, attribute_value):
-    return next(
-        iter(
+        allowed_attributes = dict(
             [
-                value
-                for value in vars(obj).values()
-                if getattr(value, attribute_name, None) == attribute_value
+                attribute
+                for attribute in delta.state.items()
+                if matter_normalizer.allowed_attribute(attribute)
             ]
-        ),
-        None,
-    )
+        )
+
+        for attribute in allowed_attributes.items():
+            global message_id
+
+            messages.update(
+                {
+                    message_id: {node_key: node_key, attributes: attributes},
+                }
+            )
+
+            send_websocker_message(
+                "device_command",
+                str(message_id),
+                args=matter_normalizer.command_args_normalize(node_id, attribute),
+            )
+
+            message_id += 1
+
+    except Exception as e:
+        print(e)
 
 
-def get_cluster_by_id(clusters, id: int):
-    return get_class_by_attribute_value(clusters, "id", id)
+def on_websocket_message(client, message):
+    try:
+        json_payload = json.loads(message)
+
+        message_id = json_payload.get("message_id", None)
+        stored_message = messages.pop(message_id, None)
+
+        if stored_message is not None:
+            command, values = stored_message
+
+            if command == "device_command":
+                node_key, attribute = values
+
+                aws_client.update_values(dict([attribute]), node_key)
+        elif (
+            message_id == "start_listening"
+            or message_id == "get_nodes"
+            or message_id == "get_node"
+        ):
+            json_nodes = json_payload.get("result", [])
+
+            json_nodes = [json_nodes] if isinstance(json_nodes, dict) else json_nodes
+
+            if isinstance(json_nodes, list):
+                normalized_nodes = [
+                    normalized_node
+                    for normalized_node in [
+                        matter_normalizer.node_normalize(json_node)
+                        for json_node in json_nodes
+                        if json_node is not None
+                    ]
+                    if normalized_node is not None
+                ]
+
+                for normalized_node in normalized_nodes:
+                    node_key, node_id, attributes = normalized_node
+
+                    nodes.setdefault(node_id, node_key)
+
+                    aws_client.update_values(attributes, node_key)
+        else:
+            event = json_payload.get("event", None)
+
+            if event == "attribute_updated":
+                node_id, *attribute = json_payload["data"]
+
+                node_key = nodes.get(node_id, None)
+
+                if node_key is not None and matter_normalizer.allowed_attribute(
+                    tuple(attribute)
+                ):
+                    aws_client.update_values(dict([attribute]), node_key)
+            elif event == "node_added" or event == "node_updated":
+                json_node = json_payload.get("data", {})
+
+                normalized_node = matter_normalizer.node_normalize(json_node)
+
+                if normalized_node is not None:
+                    node_key, node_id, attributes = normalized_node
+
+                    nodes.setdefault(node_id, node_key)
+
+                    aws_client.update_values(attributes, node_key)
+
+            else:
+                (
+                    controller_compressed_fabric_id,
+                    controller_sdk_version,
+                    controller_wifi_credentials_set,
+                    controller_thread_credentials_set,
+                ) = [
+                    json_payload.get(key, None)
+                    for key in [
+                        "compressed_fabric_id",
+                        "sdk_version",
+                        "wifi_credentials_set",
+                        "thread_credentials_set",
+                    ]
+                ]
+
+                if controller_compressed_fabric_id is not None:
+                    response = requests.get(
+                        "http://127.0.0.1:5000/ss-json/fgw.identity.check.json",
+                        verify=False,
+                    )
+
+                    if response.ok:
+                        json_response = json.loads(response.text)
+
+                        fgw_model, fgw_version, fgw_serial_number, fgw_mac = [
+                            json_response.get(key, None)
+                            for key in ["eqModel", "swVersion", "serialNumber", "mac"]
+                        ]
+
+                        aws_client.update_values(
+                            {
+                                "fgw_model": fgw_model,
+                                "fgw_version": fgw_version,
+                                "fgw_serial_number": fgw_serial_number,
+                                "fgw_mac": fgw_mac,
+                                "controller_compressed_fabric_id": controller_compressed_fabric_id,
+                                "controller_sdk_version": controller_sdk_version,
+                                "controller_wifi_credentials_set": controller_wifi_credentials_set,
+                                "controller_thread_credentials_set": controller_thread_credentials_set,
+                            }
+                        )
+                    else:
+                        exit()
+                else:
+                    print(json_payload)
+
+    except Exception as e:
+        pass
 
 
-def get_command_by_id(commands, id: int):
-    return get_class_by_attribute_value(commands, "command_id", id)
+def on_websocket_open(client):
+    send_websocker_message("start_listening")
 
 
-cluster = get_cluster_by_id(clusters, 6)
-command = get_command_by_id(cluster.Commands, 1)
+def send_websocker_message(command, message_id=None, args=None):
+    message = {
+        "message_id": message_id or command,
+        "command": command,
+    }
 
-cluster = getattr(clusters, "OnOff")
-command_cls = getattr(cluster.Commands, "On")
+    if args is not None:
+        message.update({"args": args})
 
-mqtt_client.on_message = on_mqtt_message
+    json_message = json.dumps(message)
 
-mqtt_client.username_pw_set(username, password)
+    print(json_message)
 
-mqtt_client.tls_set(cert_reqs=ssl.CERT_NONE)
+    websocket_client.send(json_message)
 
-mqtt_client.connect(broker_address, port=broker_port, keepalive=True)
 
-mqtt_client.subscribe(topic)
+def connected():
+    print("connected")
 
-mqtt_client.loop_start()
 
-websocket.enableTrace(True)
+aws_client = aws.Client(
+    endpoint="a2qzw5m91hzbht-ats.iot.eu-west-3.amazonaws.com",
+    client_id="fiber_gateway_1234",
+    certificate_id="9cc3bb6c2f624ca25e4589083b30641863ab4be25ff3be1cc6da6670ea92d694",
+    on_updated=on_aws_updated,
+    on_getted=on_aws_getted,
+    on_deleted=on_aws_deleted,
+    on_delta_updated=on_aws_delta_updated,
+)
+
+aws_client.connect(connected)
+
+# websocket.enableTrace(True)
 
 websocket_client = websocket.WebSocketApp(
     "ws://192.168.12.204:5580/ws",
