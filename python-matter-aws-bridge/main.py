@@ -4,6 +4,7 @@ import json
 import source.aws.client as aws
 import source.matter.normalizer as matter_normalizer
 import requests
+import hashlib
 
 broker_address = "ci.altice-home.cloud"
 broker_port = 1883
@@ -13,6 +14,9 @@ password = "admin"
 nodes = {}
 message_id = 1
 messages = {}
+aws_client = None
+aws_update_queue = []
+fgw_info = None
 
 
 def node_id_from_key(node_key):
@@ -81,6 +85,8 @@ def on_aws_delta_updated(node_key, delta):
 
 
 def on_websocket_message(client, message):
+    global fgw_info
+
     try:
         json_payload = json.loads(message)
 
@@ -162,8 +168,7 @@ def on_websocket_message(client, message):
 
                 if controller_compressed_fabric_id is not None:
                     response = requests.get(
-                        "http://127.0.0.1:5000/ss-json/fgw.identity.check.json",
-                        verify=False,
+                        "http://127.0.0.1:5000/ss-json/fgw.identity.check.json"
                     )
 
                     if response.ok:
@@ -174,24 +179,24 @@ def on_websocket_message(client, message):
                             for key in ["eqModel", "swVersion", "serialNumber", "mac"]
                         ]
 
-                        aws_client.update_values(
-                            {
-                                "fgw_model": fgw_model,
-                                "fgw_version": fgw_version,
-                                "fgw_serial_number": fgw_serial_number,
-                                "fgw_mac": fgw_mac,
-                                "controller_compressed_fabric_id": controller_compressed_fabric_id,
-                                "controller_sdk_version": controller_sdk_version,
-                                "controller_wifi_credentials_set": controller_wifi_credentials_set,
-                                "controller_thread_credentials_set": controller_thread_credentials_set,
-                            }
-                        )
+                        fgw_info = {
+                            "fgw_model": fgw_model,
+                            "fgw_version": fgw_version,
+                            "fgw_serial_number": fgw_serial_number,
+                            "fgw_mac": fgw_mac,
+                            "controller_compressed_fabric_id": controller_compressed_fabric_id,
+                            "controller_sdk_version": controller_sdk_version,
+                            "controller_wifi_credentials_set": controller_wifi_credentials_set,
+                            "controller_thread_credentials_set": controller_thread_credentials_set,
+                        }
+
+                        aws_client_connect()
                     else:
                         exit()
                 else:
                     print(json_payload)
 
-    except Exception as e:
+    except Exception as err:
         pass
 
 
@@ -215,23 +220,36 @@ def send_websocker_message(command, message_id=None, args=None):
     websocket_client.send(json_message)
 
 
-def connected():
-    print("connected")
+def aws_client_connect():
+    global aws_client
+
+    def connected():
+        aws_client.update_values(fgw_info)
+
+    client_id = "fiber_gateway_{}".format(
+        hashlib.sha256(
+            "{}{}{}".format(
+                fgw_info["fgw_serial_number"],
+                fgw_info["fgw_mac"],
+                fgw_info["controller_compressed_fabric_id"],
+            ).encode()
+        ).hexdigest()
+    )
+
+    aws_client = aws.Client(
+        endpoint="a2qzw5m91hzbht-ats.iot.eu-west-3.amazonaws.com",
+        client_id=client_id,
+        certificate_id="9cc3bb6c2f624ca25e4589083b30641863ab4be25ff3be1cc6da6670ea92d694",
+        on_updated=on_aws_updated,
+        on_getted=on_aws_getted,
+        on_deleted=on_aws_deleted,
+        on_delta_updated=on_aws_delta_updated,
+    )
+
+    aws_client.connect(connected)
 
 
-aws_client = aws.Client(
-    endpoint="a2qzw5m91hzbht-ats.iot.eu-west-3.amazonaws.com",
-    client_id="fiber_gateway_1234",
-    certificate_id="9cc3bb6c2f624ca25e4589083b30641863ab4be25ff3be1cc6da6670ea92d694",
-    on_updated=on_aws_updated,
-    on_getted=on_aws_getted,
-    on_deleted=on_aws_deleted,
-    on_delta_updated=on_aws_delta_updated,
-)
-
-aws_client.connect(connected)
-
-# websocket.enableTrace(True)
+websocket.enableTrace(True)
 
 websocket_client = websocket.WebSocketApp(
     "ws://192.168.12.204:5580/ws",
@@ -239,4 +257,4 @@ websocket_client = websocket.WebSocketApp(
     on_open=on_websocket_open,
 )
 
-websocket_client.run_forever(reconnect=True)
+websocket_client.run_forever(reconnect=10)
