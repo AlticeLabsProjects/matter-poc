@@ -1,4 +1,3 @@
-from attr import attributes
 import websocket
 import json
 import source.aws.client as aws
@@ -6,14 +5,8 @@ import source.matter.normalizer as matter_normalizer
 import requests
 import hashlib
 
-broker_address = "ci.altice-home.cloud"
-broker_port = 1883
-topic = "/test"
-username = "events-altice-dev:admin"
-password = "admin"
 nodes = {}
 message_id = 1
-messages = {}
 aws_client = None
 aws_update_queue = []
 fgw_info = None
@@ -35,12 +28,6 @@ def on_aws_deleted(node_key, values):
     global message_id
 
     node_id = node_id_from_key(node_key)
-
-    messages.update(
-        {
-            message_id: {node_key: node_key, attributes: attributes},
-        }
-    )
 
     send_websocker_message(
         "remove_node",
@@ -66,12 +53,6 @@ def on_aws_delta_updated(node_key, delta):
         for attribute in allowed_attributes.items():
             global message_id
 
-            messages.update(
-                {
-                    message_id: {node_key: node_key, attributes: attributes},
-                }
-            )
-
             send_websocker_message(
                 "device_command",
                 str(message_id),
@@ -91,16 +72,8 @@ def on_websocket_message(client, message):
         json_payload = json.loads(message)
 
         message_id = json_payload.get("message_id", None)
-        stored_message = messages.pop(message_id, None)
 
-        if stored_message is not None:
-            command, values = stored_message
-
-            if command == "device_command":
-                node_key, attribute = values
-
-                aws_client.update_values(dict([attribute]), node_key)
-        elif (
+        if (
             message_id == "start_listening"
             or message_id == "get_nodes"
             or message_id == "get_node"
