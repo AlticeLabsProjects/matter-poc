@@ -16,6 +16,9 @@ websocket_client_port = os.getenv("WS_PORT")
 
 aws_client_endpoint = os.getenv("AWS_ENDPOINT")
 
+fgw_client_host = os.getenv("FGW_HOST")
+fgw_client_port = os.getenv("FGW_PORT")
+
 nodes = {}
 message_id = 1
 aws_client = None
