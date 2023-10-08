@@ -11,7 +11,7 @@ def get_serial_number():
         f = open(file_path, "r")
 
         try:
-            return f.readline()
+            return f.readline().strip()
         finally:
             f.close()
     else:
