@@ -1,9 +1,20 @@
-import websocket
+import hashlib
 import json
+import os
+
+import requests
+import websocket
+from dotenv import load_dotenv
+
 import source.aws.client as aws
 import source.matter.normalizer as matter_normalizer
-import requests
-import hashlib
+
+load_dotenv()
+
+websocket_client_host = os.getenv("WS_HOST")
+websocket_client_port = os.getenv("WS_PORT")
+
+aws_client_endpoint = os.getenv("AWS_ENDPOINT")
 
 nodes = {}
 message_id = 1
@@ -141,7 +152,9 @@ def on_websocket_message(client, message):
 
                 if controller_compressed_fabric_id is not None:
                     response = requests.get(
-                        "http://127.0.0.1:5000/ss-json/fgw.identity.check.json"
+                        "http://{}:{}/ss-json/fgw.identity.check.json".format(
+                            fgw_client_host, fgw_client_port
+                        )
                     )
 
                     if response.ok:
@@ -210,7 +223,7 @@ def aws_client_connect():
     )
 
     aws_client = aws.Client(
-        endpoint="a2qzw5m91hzbht-ats.iot.eu-west-3.amazonaws.com",
+        endpoint=aws_client_endpoint,
         client_id=client_id,
         certificate_id="9cc3bb6c2f624ca25e4589083b30641863ab4be25ff3be1cc6da6670ea92d694",
         on_updated=on_aws_updated,
@@ -225,7 +238,7 @@ def aws_client_connect():
 websocket.enableTrace(True)
 
 websocket_client = websocket.WebSocketApp(
-    "ws://192.168.12.204:5580/ws",
+    "ws://{}:{}/ws".format(websocket_client_host, websocket_client_port),
     on_message=on_websocket_message,
     on_open=on_websocket_open,
 )
