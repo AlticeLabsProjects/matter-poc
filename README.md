@@ -31,7 +31,7 @@ Show remote control with Altice Home
 
 ## Altice Home + Google Home multi-admin
 
-**scenario 1**
+**scenario 1** (nice to have)
 - commissioning to Altice Fabric
 - share to Google Home
 - concurrent control with Altice Home & Google Home
@@ -43,7 +43,7 @@ Show remote control with Altice Home
 
 ## Altice Home + Apple Home multi-admin
 
-**scenario 1**
+**scenario 1** (nice to have)
 - commissioning to Altice Fabric
 - share to Apple Home
 - concurrent control with Altice Home & Apple Home
@@ -55,7 +55,7 @@ Show remote control with Altice Home
 
 ## Altice Home + Home Assistant multi-admin
 
-**scenario 1**
+**scenario 1** (nice to have)
 - commissioning to Altice Fabric
 - share to Home Assistant
 - concurrent control with Altice Home & Home Assistant
