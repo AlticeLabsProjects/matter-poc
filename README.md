@@ -60,7 +60,7 @@ Show remote control with Altice Home
 - share to Home Assistant
 - concurrent control with Altice Home & Home Assistant
 
-**scenario 2**
+**scenario 2** (Home Assistant)
 - commissioning to Home Assistant
 - share to Altice Fabric
 - concurrent control with Altice Home & Home Assistant
