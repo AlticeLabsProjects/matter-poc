@@ -14,9 +14,9 @@
 
 **Open Questions**
 
+- where to host the Admin features setting the ACLs?
 - Mobile App as Matter node playing controller role overlapping with resident Matter Controller?
 - Local control using native Matter primitives where Mobile would use different APIs for remote and local control?
-- How to provide technical support if the Controller is hosted at the end-user device? How is it done today with FiberGW / STBs?
 - Transport protocol to be used for control:
   - WSS
   - MQTT
@@ -24,10 +24,11 @@
 
 ### Controlling functionalities
 
-#### Basic Matter Controller
+#### Matter Basics
 
 - Matter devices registration
 - Matter OTA
+- Matter Stack (data model + interaction model...)
 - Matter bridges
 - ...
 
@@ -42,6 +43,26 @@
 - Non-Matter integrations e.g. Tuya, Shelly, ...
 - ...
 
+### Applications
+
+#### Mobile App functionalities
+
+- Devices Commissioning
+- Control UI
+- Management UI
+- ...
+
+#### Automation / Scenarios
+
+- sensor triggers
+- scheduller trigger
+- commands to actuators
+- persistence
+- creation
+- update
+- removal
+- backup upload
+
 #### Security App
 
 - Zone management
@@ -50,12 +71,7 @@
 - Alarms
 - ...
 
-#### Mobile App functionalities
-
-- Devices Commissioning
-- Control UI
-- Management UI
-- ...
+#### Energy App
 
 ### Management functionalities
 
@@ -84,7 +100,7 @@ To simplify integration with HomeBot we should consider skip Matter Local contro
 
 Functionalities that are currently provided by HomeBot:
 
-- User channel interaction API: Interface for integration with user channels, like voice assistants, assuring bidirectional communication if necessary (Not used, to be confirmed)
+- User channel interaction API: Interface for integration with user channels, like voice assistants, assuring bidirectional communication if necessary (Not used)
 - Backoffice API: Interface to support backoffice Portal and operational tools - > to confirm if this is used with the new opco portal
 - Device Management
 - Home & Customers Inventory: knowledge base for all customers, homes and home objects including rooms and devices
