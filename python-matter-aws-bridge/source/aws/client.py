@@ -1,6 +1,6 @@
 from uuid import uuid4
 from awscrt import mqtt
-from awsiot import iotshadow, mqtt_connection_builder
+from awsiot import iotidentity, iotshadow, mqtt_connection_builder
 from os import path, getcwd
 
 
@@ -136,6 +136,12 @@ class _Shadow:
         self._client._on_deleted(self._name, response)
 
     def _on_delete_rejected(self, error):
+        print(error)
+
+    def _on_create_certificate_from_csr_accepted(self, response):
+        print(response)
+
+    def _on_create_certificate_from_csr_rejected(self, error):
         print(error)
 
     def _on_delta_updated(self, delta):
