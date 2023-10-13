@@ -16,8 +16,10 @@ ENV PYTHONUNBUFFERED=1
 
 ENV WS_HOST=127.0.0.1
 ENV WS_PORT=5580
-ENV AWS_ENDPOINT=a2qzw5m91hzbht-ats.iot.eu-west-3.amazonaws.com
-ENV FGW_HOST=127.0.0.1
+ENV AWS_IOT_ENDPOINT=a2qzw5m91hzbht-ats.iot.eu-west-3.amazonaws.com
+ENV AWS_API_URL=https://9oro4aipol.execute-api.eu-west-3.amazonaws.com/Prod/home/onboard/claim
+ENV AWS_TEMPLATE_NAME=MatterProvisioningTemplate
+ENV FGW_HOST=192.168.1.254
 ENV FGW_PORT=80
 
 WORKDIR /app
