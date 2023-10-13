@@ -93,12 +93,12 @@ _allowed_clusters = [
     ),
     (
         "*",
-        _cluster_level_control_id,
+        _cluster_color_control_id,
         _get_attribute_id(clusters_objects.ColorControl.Attributes.ColorMode),
     ),
     (
         "*",
-        _cluster_level_control_id,
+        _cluster_color_control_id,
         _get_attribute_id(clusters_objects.ColorControl.Attributes.CurrentHue),
     ),
     (
@@ -230,7 +230,7 @@ def command_args_normalize(node_id, attribute):
         ):
             args.update(
                 args_command(
-                    clusters_objects.ColorControl.Commands.MoveSaturation,
+                    clusters_objects.ColorControl.Commands.MoveToSaturation,
                     {"saturation": value},
                 )
             )
@@ -239,7 +239,7 @@ def command_args_normalize(node_id, attribute):
         ):
             args.update(
                 args_command(
-                    clusters_objects.ColorControl.Commands.MoveColorTemperature,
+                    clusters_objects.ColorControl.Commands.MoveToColorTemperature,
                     {"colorTemperatureMireds": value},
                 )
             )
