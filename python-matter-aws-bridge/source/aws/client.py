@@ -1,46 +1,29 @@
 from uuid import uuid4
 from awscrt import mqtt
-from awsiot import iotidentity, iotshadow, mqtt_connection_builder
-from os import path, getcwd
+from awsiot import iotshadow
+
+from source.aws.connection import Connection
 
 
-class Client:
+class Client(Connection):
     def __init__(
         self,
-        endpoint,
-        client_id,
-        certificate_id,
+        thing_name,
         on_updated,
         on_getted,
         on_deleted,
         on_delta_updated,
     ):
-        self.client_id = client_id
+        super().__init__(thing_name)
+
         self._nodes = dict()
         self._on_updated = on_updated
         self._on_getted = on_getted
         self._on_deleted = on_deleted
         self._on_delta_updated = on_delta_updated
 
-        certificate_path = path.join(getcwd(), "certificate")
-
-        def certificate_filename(sufix):
-            return path.join(certificate_path, "{}-{}".format(certificate_id, sufix))
-
-        self._mqtt_connection = mqtt_connection_builder.mtls_from_path(
-            endpoint=endpoint,
-            cert_filepath=certificate_filename("certificate.pem.crt"),
-            pri_key_filepath=certificate_filename("private.pem.key"),
-            ca_filepath=path.join(certificate_path, "AmazonRootCA1.pem"),
-            client_id=client_id,
-            clean_session=False,
-            keep_alive_secs=30,
-        )
-
     def connect(self, connected):
-        self.connected_future = self._mqtt_connection.connect()
-
-        self.connected_future.result()
+        self._mqtt_connection = super().connect()
 
         self._shadow = _Shadow(self)
 
@@ -81,7 +64,7 @@ class _Shadow:
 
                 future, _ = shadow_client_subscribe_to(
                     request=iotshadow_subscription_request(
-                        thing_name=client.client_id, shadow_name=name
+                        thing_name=client.thing_name, shadow_name=name
                     ),
                     qos=mqtt.QoS.AT_LEAST_ONCE,
                     callback=callback,
@@ -112,7 +95,7 @@ class _Shadow:
 
         future, _ = shadow_client_subscribe_to(
             request=iotshadow_subscription_request(
-                thing_name=client.client_id, shadow_name=name
+                thing_name=client.thing_name, shadow_name=name
             ),
             qos=mqtt.QoS.AT_LEAST_ONCE,
             callback=self._on_delta_updated,
@@ -155,7 +138,7 @@ class _Shadow:
         )
 
         request = iotshadow_update_shadow_request(
-            thing_name=self._client.client_id,
+            thing_name=self._client.thing_name,
             shadow_name=self._name,
             state=iotshadow.ShadowState(desired=values, reported=values),
             client_token=token,

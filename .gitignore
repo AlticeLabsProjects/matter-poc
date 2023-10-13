@@ -1,4 +1,4 @@
-python-fake-fgw/.venv
-python-fake-fgw/__pycache__
-python-matter-aws-bridge/.venv
-python-matter-aws-bridge/__pycache__
+**/.DS_Store
+**/__pycache__
+**/.venv
+python-matter-aws-bridge/certificate/*

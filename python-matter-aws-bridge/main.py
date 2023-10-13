@@ -14,8 +14,6 @@ load_dotenv()
 websocket_client_host = os.getenv("WS_HOST")
 websocket_client_port = os.getenv("WS_PORT")
 
-aws_client_endpoint = os.getenv("AWS_ENDPOINT")
-
 fgw_client_host = os.getenv("FGW_HOST")
 fgw_client_port = os.getenv("FGW_PORT")
 
@@ -185,7 +183,7 @@ def on_websocket_message(client, message):
                 else:
                     print(json_payload)
 
-    except Exception as err:
+    except Exception:
         pass
 
 
@@ -215,7 +213,7 @@ def aws_client_connect():
     def connected():
         aws_client.update_values(fgw_info)
 
-    client_id = "fiber_gateway_{}".format(
+    thing_name = "fiber_gateway_{}".format(
         hashlib.sha256(
             "{}{}{}".format(
                 fgw_info["fgw_serial_number"],
@@ -226,9 +224,7 @@ def aws_client_connect():
     )
 
     aws_client = aws.Client(
-        endpoint=aws_client_endpoint,
-        client_id=client_id,
-        certificate_id="9cc3bb6c2f624ca25e4589083b30641863ab4be25ff3be1cc6da6670ea92d694",
+        thing_name=thing_name,
         on_updated=on_aws_updated,
         on_getted=on_aws_getted,
         on_deleted=on_aws_deleted,
