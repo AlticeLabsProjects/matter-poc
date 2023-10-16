@@ -4,7 +4,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import NameOID
-from os import path, getcwd
+from os import path, getcwd, makedirs
 
 certificate_pem_store_key = "certificatePem"
 private_key_pem_store_key = "privateKeyPem"
@@ -80,6 +80,8 @@ def save_certificate(thing_name, certificate_pem, private_key_pem):
     file_store = None
 
     try:
+        makedirs(path.dirname(filename), exist_ok=True)
+
         file_store = open(filename, "w")
 
         json.dump(
