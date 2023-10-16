@@ -238,8 +238,12 @@ def aws_client_connect():
 
 websocket.enableTrace(True)
 
+url = "ws://{}:{}/ws".format(websocket_client_host, websocket_client_port)
+
+print("Connecting to {}".format(url))
+
 websocket_client = websocket.WebSocketApp(
-    "ws://{}:{}/ws".format(websocket_client_host, websocket_client_port),
+    url,
     on_message=on_websocket_message,
     on_open=on_websocket_open,
 )
