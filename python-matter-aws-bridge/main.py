@@ -152,11 +152,13 @@ def on_websocket_message(client, message):
                 ]
 
                 if controller_compressed_fabric_id is not None:
-                    response = requests.get(
-                        "http://{}:{}/ss-json/fgw.identity.check.json".format(
-                            fgw_client_host, fgw_client_port
-                        )
+                    url = "http://{}:{}/ss-json/fgw.identity.check.json".format(
+                        fgw_client_host, fgw_client_port
                     )
+
+                    print("Connecting to {}".format(url))
+
+                    response = requests.get(url)
 
                     if response.ok:
                         json_response = json.loads(response.text)

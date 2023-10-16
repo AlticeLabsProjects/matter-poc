@@ -25,6 +25,8 @@ class Connection:
         self._template_name = getenv("AWS_TEMPLATE_NAME")
 
     def __downloadClaim(self):
+        print("Connecting to {}".format(self._api_url))
+
         response = requests.get(self._api_url)
 
         if response.ok and "application/json" in response.headers.get(
@@ -40,6 +42,8 @@ class Connection:
         raise Exception("Cannot get claim certificate")
 
     def __connect(self, client_id, certificate_pem, private_key_pem):
+        print("Connecting to {}".format(self._iot_endpoint))
+
         mqtt_connection = mqtt_connection_builder.mtls_from_bytes(
             endpoint=self._iot_endpoint,
             cert_bytes=bytes(certificate_pem, "utf-8"),
