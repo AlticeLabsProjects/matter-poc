@@ -1,14 +1,16 @@
-#Instalação do python-matter-aws-bridge
+# Instalação do python-matter-aws-bridge
 
-Esta ferramenta está composta por duas componentes, o python-matter-aws-bridge, que faz a ponte entre o Matter Server do Home Assistant e a AWS.
+Esta ferramenta está composta por duas componentes, o **python-matter-aws-bridge**, que faz a ponte entre o **Matter Server** do **Home Assistant** e a **AWS**.
 
-O python-matter-aws-bridge, para se registar na AWS, precisa de informações referentes à Fiber Gateway, e para tal, nas configurações do Docker está definido o host 192.168.1.254.
+O **python-matter-aws-bridge**, para se registar na **AWS**, precisa de informações referentes à **Fiber Gateway**, e para tal, nas configurações do Docker está definido o host 192.168.1.254.
 
-Na inexistência duma Fiber Gateway, como por exemplo, numa rede empresarial, será necessária a utilização da segunda componente, o python-fake-fgw. Esta componente irá devolver o número de série e mac address do equipamento em questão, como por exemplo, dum RaspberryPI ou Dusum.
+Na inexistência duma **Fiber Gateway**, como por exemplo, numa rede empresarial, será necessária a utilização da segunda componente, o **python-fake-fgw**. Esta componente irá devolver o número de série e mac address do equipamento em questão, como por exemplo, dum *RaspberryPI* ou *Dusum*.
 
-Os passos seguintes referem a uma instalação na Dusum.
+*Os passos seguintes referem a uma instalação na Dusum.*
 
-*Encontrar o IP da máquina em quastão.
+## Configuração do **Matter Server** no **Home Assistant**
+
+Encontrar o IP da máquina em quastão.
 
 Num browser, entrar no Home Assistant para criar a conta:
 
@@ -34,51 +36,41 @@ Garantir se o "Use the official Matter Server Supervisor add-on" está seleciona
 
 Assim que o serviço tiver arrancado, algo que demora algum tempo, continuamos com a instalação.
 
-Fazer ssh à máquina da Dusum com o username e password root:
+# Código para a criação das imagens do Docker
 
-'''
+Fazer ssh à máquina da *Dusum* com o username e password root:
+
+```
 ssh root@192.168.1.xxx
-'''
+```
 
 Clonar o projeto do GitHub:
 
-'''
+```
+cd /root
 git clone https://github.com/AlticeLabsProjects/matter-poc.git
-'''
+```
 
-Entrar na pasta do python-fake-fgw:
+# Construção da imagem do **python-fake-fgw**
 
-'''
+```
 cd /root/matter-poc/python-fake-fgw
-'''
-
-Fazer build do Docker:
-
-'''
 DOCKER_BUILDKIT=1 docker build --tag python-fake-fgw .
-'''
+docker run --detach --restart unless-stopped --network host --privileged --name python-fake-fgw python-fake-fgw
+```
 
-Correr o Docker:
+Com isto, ficamos com um serviço http à escuta na porta 5000.
 
-'''
-docker run --detach --restart unless-stopped --publish 80:5000 --privileged --name python-fake-fgw python-fake-fgw
-'''
+# Construção da imagem do **python-matter-aws-bridge**
 
-Entrar na pasta do python-matter-aws-bridge:
+*Atenção às duas variáveis de ambiente para utilizar o **python-fake-fgw***
 
-'''
+```
 cd /root/matter-poc/python-matter-aws-bridge
-'''
-
-Fazer build do Docker:
-
-'''
 DOCKER_BUILDKIT=1 docker build --tag python-matter-aws-bridge .
-'''
+docker run --detach --restart unless-stopped --env FGW_HOST=127.0.0.1 --env FGW_PORT=5000 --network host --name python-matter-aws-bridge python-matter-aws-bridge
+```
 
-Correr o Docker:
+Se tudo correr bem, neste momento, temos um thing na **AWS**.
 
-'''
-docker run --detach --restart unless-stopped --env FGW_HOST=127.0.0.1 --name python-matter-aws-bridge python-matter-aws-bridge
-'''
 
