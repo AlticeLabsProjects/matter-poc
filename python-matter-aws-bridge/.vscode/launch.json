@@ -12,15 +12,6 @@
             "console": "integratedTerminal",
             "justMyCode": false,
             "subProcess": true,
-        },
-        {
-            "name": "Test",
-            "type": "python",
-            "request": "launch",
-            "program": "test.py",
-            "console": "integratedTerminal",
-            "justMyCode": false,
-            "subProcess": true,
         }
     ]
 }
