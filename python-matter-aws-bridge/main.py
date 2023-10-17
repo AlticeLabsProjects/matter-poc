@@ -228,7 +228,18 @@ def aws_client_connect():
     global aws_client
 
     def on_connected():
-        aws_client.update_values(fgw_info)
+        aws_client.update_values(
+            {
+                "fgwModel": fgw_info["fgw_model"],
+                "fgwVersion": fgw_info["fgw_version"],
+                "fgwSerialNumber": fgw_info["fgw_serial_number"],
+                "fgwMacAddress": fgw_info["fgw_mac"],
+                "controllerCompressedFabricId": fgw_info[
+                    "controller_compressed_fabric_id"
+                ],
+                "controllerSdkVersion": fgw_info["controller_sdk_version"],
+            }
+        )
 
     thing_name = "fiber_gateway_{}".format(
         hashlib.sha256(

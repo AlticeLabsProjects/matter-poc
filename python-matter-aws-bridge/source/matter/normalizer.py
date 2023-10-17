@@ -173,7 +173,7 @@ def node_normalize(node):
         [attribute for attribute in attributes.items() if allowed_attribute(attribute)]
     )
 
-    allowed_attributes["date_commissioned"] = date_commissioned
+    allowed_attributes["commissionedDate"] = date_commissioned
     allowed_attributes["available"] = available
 
     return (
