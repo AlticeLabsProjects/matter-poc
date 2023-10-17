@@ -28,46 +28,46 @@ _attribute_serial_number_id = _get_attribute_id(
 
 _allowed_clusters = [
     (
-        0,
+        "*",
         _cluster_descriptor_id,
         _get_attribute_id(clusters_objects.Descriptor.Attributes.DeviceTypeList),
     ),
     (
-        0,
+        "*",
         _cluster_basic_information_id,
         _get_attribute_id(clusters_objects.BasicInformation.Attributes.VendorName),
     ),
     (
-        0,
+        "*",
         _cluster_basic_information_id,
         _attribute_vendor_id,
     ),
     (
-        0,
+        "*",
         _cluster_basic_information_id,
         _get_attribute_id(clusters_objects.BasicInformation.Attributes.ProductName),
     ),
     (
-        0,
+        "*",
         _cluster_basic_information_id,
         _attribute_product_id,
     ),
     (
-        0,
+        "*",
         _cluster_basic_information_id,
         _get_attribute_id(
             clusters_objects.BasicInformation.Attributes.HardwareVersionString
         ),
     ),
     (
-        0,
+        "*",
         _cluster_basic_information_id,
         _get_attribute_id(
             clusters_objects.BasicInformation.Attributes.SoftwareVersionString
         ),
     ),
     (
-        0,
+        "*",
         _cluster_basic_information_id,
         _attribute_serial_number_id,
     ),
