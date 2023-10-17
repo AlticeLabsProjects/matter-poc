@@ -44,7 +44,7 @@ def on_aws_deleted(node_key, values):
     send_websocker_message(
         "remove_node",
         str(message_id),
-        args={"node_id": node_id},
+        {"node_id": node_id},
     )
 
     message_id += 1
@@ -68,7 +68,7 @@ def on_aws_delta_updated(node_key, delta):
             send_websocker_message(
                 "device_command",
                 str(message_id),
-                args=matter_normalizer.command_args_normalize(node_id, attribute),
+                matter_normalizer.command_args_normalize(node_id, attribute),
             )
 
             message_id += 1
@@ -81,9 +81,15 @@ def on_aws_command(payload):
     command, *args = payload.values()
 
     if "commission_with_code" in command:
-        ssid, credentials = args
+        code, ssid, credentials = args
 
-        print(ssid, credentials)
+        send_websocker_message(
+            "set_wifi_credentials", None, {"ssid": ssid, "credentials": credentials}
+        )
+
+        send_websocker_message("commission_with_code", None, {"code": code})
+    elif "commission_on_network" in command:
+        send_websocker_message("commission_on_network", None, {"setup_pin_code": code})
 
 
 def on_websocket_message(client, message):
