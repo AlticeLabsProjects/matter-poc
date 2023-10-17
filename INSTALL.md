@@ -73,4 +73,16 @@ docker run --detach --restart unless-stopped --env FGW_HOST=127.0.0.1 --env FGW_
 
 Se tudo correr bem, neste momento, temos um thing na **AWS**.
 
+# Reconstruír a imagem
+
+```
+docker stop python-matter-aws-bridge
+docker rm python-matter-aws-bridge
+cd /root/matter-poc
+git pull
+```
+
+Voltar a construír a imagem
+
+
 
