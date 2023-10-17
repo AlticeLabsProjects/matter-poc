@@ -134,7 +134,7 @@ def on_websocket_message(client, message):
 
                     aws_client.update_values(
                         {
-                            "date_commissioned": date_commissioned,
+                            "commissionedDate": date_commissioned,
                             "available": available,
                             "attributes": attributes,
                         },
@@ -170,7 +170,7 @@ def on_websocket_message(client, message):
 
                     aws_client.update_values(
                         {
-                            "date_commissioned": date_commissioned,
+                            "commissionedDate": date_commissioned,
                             "available": available,
                             "attributes": attributes,
                         },
