@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import re
 
 import requests
 import websocket
@@ -121,11 +122,24 @@ def on_websocket_message(client, message):
                 ]
 
                 for normalized_node in normalized_nodes:
-                    node_key, node_id, attributes = normalized_node
+                    (
+                        node_key,
+                        node_id,
+                        date_commissioned,
+                        available,
+                        attributes,
+                    ) = normalized_node
 
                     nodes.setdefault(node_id, node_key)
 
-                    aws_client.update_values(attributes, node_key)
+                    aws_client.update_values(
+                        {
+                            "date_commissioned": date_commissioned,
+                            "available": available,
+                            "attributes": attributes,
+                        },
+                        node_key,
+                    )
         else:
             event = json_payload.get("event", None)
 
@@ -144,11 +158,24 @@ def on_websocket_message(client, message):
                 normalized_node = matter_normalizer.node_normalize(json_node)
 
                 if normalized_node is not None:
-                    node_key, node_id, attributes = normalized_node
+                    (
+                        node_key,
+                        node_id,
+                        date_commissioned,
+                        available,
+                        attributes,
+                    ) = normalized_node
 
                     nodes.setdefault(node_id, node_key)
 
-                    aws_client.update_values(attributes, node_key)
+                    aws_client.update_values(
+                        {
+                            "date_commissioned": date_commissioned,
+                            "available": available,
+                            "attributes": attributes,
+                        },
+                        node_key,
+                    )
 
             else:
                 (
@@ -186,7 +213,9 @@ def on_websocket_message(client, message):
                         fgw_info = {
                             "fgw_model": fgw_model,
                             "fgw_version": fgw_version,
-                            "fgw_serial_number": fgw_serial_number,
+                            "fgw_serial_number": "".join(
+                                re.findall("[a-zA-Z0-9_.,@/:#-]*", fgw_serial_number)
+                            ),
                             "fgw_mac": fgw_mac,
                             "controller_compressed_fabric_id": controller_compressed_fabric_id,
                             "controller_sdk_version": controller_sdk_version,

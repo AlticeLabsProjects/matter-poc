@@ -173,14 +173,13 @@ def node_normalize(node):
         [attribute for attribute in attributes.items() if allowed_attribute(attribute)]
     )
 
-    allowed_attributes["commissionedDate"] = date_commissioned
-    allowed_attributes["available"] = available
-
     return (
         hashlib.sha256(
             "{}{}{}{}".format(node_id, vendor_id, product_id, serial_number).encode()
         ).hexdigest(),
         node_id,
+        date_commissioned,
+        available,
         allowed_attributes,
     )
 
