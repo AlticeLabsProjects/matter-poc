@@ -77,6 +77,15 @@ def on_aws_delta_updated(node_key, delta):
         print(e)
 
 
+def on_aws_command(payload):
+    command, *args = payload.values()
+
+    if "commission_with_code" in command:
+        ssid, credentials = args
+
+        print(ssid, credentials)
+
+
 def on_websocket_message(client, message):
     global fgw_info
 
@@ -212,7 +221,7 @@ def send_websocker_message(command, message_id=None, args=None):
 def aws_client_connect():
     global aws_client
 
-    def connected():
+    def on_connected():
         aws_client.update_values(fgw_info)
 
     thing_name = "fiber_gateway_{}".format(
@@ -233,7 +242,7 @@ def aws_client_connect():
         on_delta_updated=on_aws_delta_updated,
     )
 
-    aws_client.connect(connected)
+    aws_client.connect(on_connected, on_aws_command)
 
 
 websocket.enableTrace(True)

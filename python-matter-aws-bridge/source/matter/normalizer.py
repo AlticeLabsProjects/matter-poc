@@ -148,6 +148,7 @@ def allowed_attribute(attribute):
 
 def node_normalize(node):
     node_id = node.get("node_id", None)
+    available = node.get("available", None)
     attributes = node.get("attributes", {})
 
     if not (node_id and isinstance(attributes, dict)):
@@ -171,9 +172,11 @@ def node_normalize(node):
         [attribute for attribute in attributes.items() if allowed_attribute(attribute)]
     )
 
+    allowed_attributes["available"] = available
+
     return (
         hashlib.sha256(
-            "{}{}{}".format(vendor_id, product_id, serial_number).encode()
+            "{}{}{}{}".format(node_id, vendor_id, product_id, serial_number).encode()
         ).hexdigest(),
         node_id,
         allowed_attributes,

@@ -1,3 +1,4 @@
+import json
 from uuid import uuid4
 from awscrt import mqtt
 from awsiot import iotshadow
@@ -22,12 +23,35 @@ class Client(Connection):
         self._on_deleted = on_deleted
         self._on_delta_updated = on_delta_updated
 
-    def connect(self, connected):
-        self._mqtt_connection = super().connect()
+    def connect(self, on_connected, on_command):
+        try:
+            self._mqtt_connection = super().connect()
 
-        self._shadow = _Shadow(self)
+            self._command_topic = "matter/things/{}/command".format(self.thing_name)
 
-        connected()
+            def on_message_received(topic, payload, **kwargs):
+                on_command(json.loads(payload))
+
+            future, _ = self._mqtt_connection.subscribe(
+                topic=self._command_topic,
+                qos=mqtt.QoS.AT_LEAST_ONCE,
+                callback=on_message_received,
+            )
+
+            future.result()
+
+            self._shadow = _Shadow(self)
+
+            on_connected()
+        except Exception as error:
+            print(error)
+
+    def publish_command(self, payload):
+        self._mqtt_connection.publish(
+            topic=self._command_topic,
+            payload=json.dumps(payload),
+            qos=mqtt.QoS.AT_LEAST_ONCE,
+        )
 
     def update_values(self, values, name=None):
         shadow = (
