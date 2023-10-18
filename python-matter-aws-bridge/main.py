@@ -58,7 +58,7 @@ def on_aws_delta_updated(node_key, delta):
         allowed_attributes = dict(
             [
                 attribute
-                for attribute in delta.state.items()
+                for attribute in delta.state["attributes"].items()
                 if matter_normalizer.allowed_attribute(attribute)
             ]
         )
