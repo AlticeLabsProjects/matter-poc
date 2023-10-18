@@ -17,6 +17,12 @@
 | --- | --- | ---|
 | onOff | 0x00000000 | 0 |
 
+### LevelControl
+
+| Attribute | Hex | Dec |
+| --- | --- | ---|
+| currentLevel | 0x00000000 | 0 |
+
 ### BridgedDeviceBasicInformation
 
 | Attribute | Hex | Dec |
