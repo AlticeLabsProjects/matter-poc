@@ -34,6 +34,12 @@
 | minLevel | 0x00000002 | 2 |
 | maxLevel | 0x00000003 | 3 |
 
+### Descriptor
+
+| Attribute | Hex | Dec |
+| --- | --- | ---|
+| deviceTypeList | 0x00000000 | 0 |
+
 ### BridgedDeviceBasicInformation
 
 | Attribute | Hex | Dec |
