@@ -1,5 +1,12 @@
 # Identificação de dispositivos Matter
 
+## Device Types
+
+| Name | Hex | Dec |
+| --- | --- | --- |
+| Plug | 0x0000010A | 266 |
+| Blub | 0x0000010D | 269 |
+
 ## Clusters
 
 | Cluster | Hex | Dec |
