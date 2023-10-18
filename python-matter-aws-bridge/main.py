@@ -90,6 +90,8 @@ def on_aws_command(payload):
 
         send_websocker_message("commission_with_code", None, {"code": code})
     elif "commission_on_network" in command:
+        code = args
+
         send_websocker_message("commission_on_network", None, {"setup_pin_code": code})
 
 

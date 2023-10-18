@@ -12,6 +12,9 @@ def _get_attribute_id(attribute):
 
 _cluster_descriptor_id = _get_cluster_id(clusters_objects.Descriptor)
 _cluster_basic_information_id = _get_cluster_id(clusters_objects.BasicInformation)
+_cluster_bridged_device_basic_information_id = _get_cluster_id(
+    clusters_objects.BridgedDeviceBasicInformation
+)
 _cluster_on_off_id = _get_cluster_id(clusters_objects.OnOff)
 _cluster_level_control_id = _get_cluster_id(clusters_objects.LevelControl)
 _cluster_color_control_id = _get_cluster_id(clusters_objects.ColorControl)
@@ -55,6 +58,11 @@ _allowed_clusters = [
     (
         "*",
         _cluster_basic_information_id,
+        _get_attribute_id(clusters_objects.BasicInformation.Attributes.NodeLabel),
+    ),
+    (
+        "*",
+        _cluster_basic_information_id,
         _get_attribute_id(
             clusters_objects.BasicInformation.Attributes.HardwareVersionString
         ),
@@ -69,6 +77,13 @@ _allowed_clusters = [
     (
         "*",
         _cluster_basic_information_id,
+        _get_attribute_id(
+            clusters_objects.BridgedDeviceBasicInformation.Attributes.NodeLabel
+        ),
+    ),
+    (
+        "*",
+        _cluster_bridged_device_basic_information_id,
         _attribute_serial_number_id,
     ),
     (
@@ -94,11 +109,6 @@ _allowed_clusters = [
     (
         "*",
         _cluster_color_control_id,
-        _get_attribute_id(clusters_objects.ColorControl.Attributes.ColorMode),
-    ),
-    (
-        "*",
-        _cluster_color_control_id,
         _get_attribute_id(clusters_objects.ColorControl.Attributes.CurrentHue),
     ),
     (
@@ -112,6 +122,11 @@ _allowed_clusters = [
         _get_attribute_id(
             clusters_objects.ColorControl.Attributes.ColorTemperatureMireds
         ),
+    ),
+    (
+        "*",
+        _cluster_color_control_id,
+        _get_attribute_id(clusters_objects.ColorControl.Attributes.ColorMode),
     ),
     (
         "*",
