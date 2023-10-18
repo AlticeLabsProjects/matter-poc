@@ -30,6 +30,8 @@
 | Attribute | Hex | Dec |
 | --- | --- | ---|
 | currentLevel | 0x00000000 | 0 |
+| minLevel | 0x00000002 | 2 |
+| maxLevel | 0x00000003 | 3 |
 
 ### BridgedDeviceBasicInformation
 
