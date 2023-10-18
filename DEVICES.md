@@ -38,3 +38,14 @@
 | Attribute | Hex | Dec |
 | --- | --- | ---|
 | nodeLabel | 0x00000005 | 5 |
+
+### ColorControl
+
+| Attribute | Hex | Dec |
+| --- | --- | ---|
+| currentHue | 0x00000000 | 0 |
+| currentSaturation | 0x00000001 | 1 |
+| colorTemperatureMireds | 0x00000007 | 7 |
+| colorMode | 0x00000008 | 8 |
+| colorTempPhysicalMinMireds | 0x0000400B | 16395 |
+| colorTempPhysicalMinMireds | 0x0000400C | 16396 |
