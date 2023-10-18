@@ -81,18 +81,21 @@ def on_aws_delta_updated(node_key, delta):
 def on_aws_command(payload):
     command, *args = payload.values()
 
-    if "commission_with_code" in command:
-        code, ssid, credentials = args
+    if "commission_with_code" in command or "commission_on_network" in command:
+        code, *args = args
 
-        send_websocker_message(
-            "set_wifi_credentials", None, {"ssid": ssid, "credentials": credentials}
-        )
+        if "commission_with_code" in command:
+            ssid, credentials, *args = args
 
-        send_websocker_message("commission_with_code", None, {"code": code})
-    elif "commission_on_network" in command:
-        code = args
+            send_websocker_message(
+                "set_wifi_credentials", None, {"ssid": ssid, "credentials": credentials}
+            )
 
-        send_websocker_message("commission_on_network", None, {"setup_pin_code": code})
+            send_websocker_message("commission_with_code", None, {"code": code})
+        elif "commission_on_network" in command:
+            send_websocker_message(
+                "commission_on_network", None, {"setup_pin_code": code}
+            )
 
 
 def on_websocket_message(client, message):
