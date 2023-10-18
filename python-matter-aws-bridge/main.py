@@ -85,7 +85,7 @@ def on_aws_command(payload):
         code, *args = args
 
         if "commission_with_code" in command:
-            ssid, credentials, *args = args
+            ssid, credentials = args
 
             send_websocker_message(
                 "set_wifi_credentials", None, {"ssid": ssid, "credentials": credentials}
@@ -156,7 +156,9 @@ def on_websocket_message(client, message):
                 if node_key is not None and matter_normalizer.allowed_attribute(
                     tuple(attribute)
                 ):
-                    aws_client.update_values(dict([attribute]), node_key)
+                    aws_client.update_values(
+                        {"attributes": dict([attribute])}, node_key
+                    )
             elif event == "node_added" or event == "node_updated":
                 json_node = json_payload.get("data", {})
 
@@ -252,8 +254,6 @@ def send_websocker_message(command, message_id=None, args=None):
         message.update({"args": args})
 
     json_message = json.dumps(message)
-
-    print(json_message)
 
     websocket_client.send(json_message)
 
