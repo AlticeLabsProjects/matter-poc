@@ -4,6 +4,7 @@
 
 | Name | Hex | Dec |
 | --- | --- | --- |
+| Generic Switch | 0x0000000F | 15 |
 | Root Node | 0x00000016 | 22 |
 | Plug | 0x0000010A | 266 |
 | Blub | 0x0000010D | 269 |
