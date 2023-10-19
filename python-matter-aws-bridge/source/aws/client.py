@@ -55,18 +55,11 @@ class Client(Connection):
         )
 
     def update_values(self, values, name=None):
-        print("UPDATE_VALUES")
-        print(values)
-        print(name)
-
         shadow = (
             self._shadow
             if name is None
             else self._nodes.setdefault(name, _Shadow(self, name))
         )
-
-        print("SHADOW")
-        print(shadow)
 
         shadow.update_values(values)
 
@@ -163,9 +156,6 @@ class _Shadow:
         self._client._on_delta_updated(self._name, delta)
 
     def update_values(self, values):
-        print("UPDATE!!!")
-        print(values)
-
         token = str(uuid4())
 
         iotshadow_update_shadow_request = getattr(

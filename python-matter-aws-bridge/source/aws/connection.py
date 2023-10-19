@@ -50,7 +50,7 @@ class Connection:
             cert_bytes=bytes(certificate_pem, "utf-8"),
             pri_key_bytes=bytes(private_key_pem, "utf-8"),
             client_id=client_id,
-            clean_session=False,
+            clean_session=True,
             keep_alive_secs=30,
         )
 

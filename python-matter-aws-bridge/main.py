@@ -116,12 +116,7 @@ def on_websocket_message(client, message):
             or message_id == "get_nodes"
             or message_id == "get_node"
         ):
-            print("START_LISTENING!!!!!!")
-
             json_nodes = json_payload.get("result", [])
-
-            print("JNODES")
-            print(json_nodes)
 
             json_nodes = [json_nodes] if isinstance(json_nodes, dict) else json_nodes
 
@@ -136,9 +131,6 @@ def on_websocket_message(client, message):
                     if normalized_node is not None
                 ]
 
-                print("NNODES")
-                print(normalized_nodes)
-
                 for normalized_node in normalized_nodes:
                     (
                         node_key,
@@ -147,9 +139,6 @@ def on_websocket_message(client, message):
                         available,
                         attributes,
                     ) = normalized_node
-
-                    print("ID")
-                    print(node_id)
 
                     try:
                         nodes.setdefault(node_id, node_key)
