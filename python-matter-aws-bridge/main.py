@@ -76,8 +76,6 @@ def on_aws_delta_updated(node_key, delta):
                 )
 
                 message_id += 1
-            else:
-                aws_client.update_values({"attributes": dict([attribute])}, node_key)
 
     except Exception as error:
         print(error)

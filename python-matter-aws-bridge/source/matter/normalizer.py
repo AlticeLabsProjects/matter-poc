@@ -12,8 +12,6 @@ def _get_attribute_id(attribute):
 
 
 _cluster_info_id = 0
-_attribute_info_name = 0
-_attribute_info_room_id = 1
 
 _cluster_descriptor_id = _get_cluster_id(clusters_objects.Descriptor)
 

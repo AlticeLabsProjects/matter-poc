@@ -169,8 +169,6 @@ class _Shadow:
             client_token=token,
         )
 
-        print(request)
-
         publish_update_shadow = getattr(
             self._shadow_client,
             "publish_update{}_shadow".format("_named" if self._is_named else ""),
