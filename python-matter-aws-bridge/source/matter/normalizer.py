@@ -11,8 +11,6 @@ def _get_attribute_id(attribute):
     return getattr(attribute, "attribute_id", None)
 
 
-_cluster_info_id = 0
-
 _cluster_descriptor_id = _get_cluster_id(clusters_objects.Descriptor)
 
 _attribute_descriptor_vendor_id = _get_attribute_id(
@@ -34,11 +32,6 @@ _cluster_level_control_id = _get_cluster_id(clusters_objects.LevelControl)
 _cluster_color_control_id = _get_cluster_id(clusters_objects.ColorControl)
 
 _allowed_clusters = [
-    (
-        "*",
-        _cluster_info_id,
-        "*",
-    ),
     (
         "*",
         _cluster_descriptor_id,
@@ -220,9 +213,6 @@ def command_args_normalize(node_id, attribute):
     key, value = attribute
 
     endpoint_id, cluster_id, attribute_id = [int(value) for value in key.split("/")]
-
-    if cluster_id == _cluster_info_id:
-        return None
 
     args = {
         "endpoint_id": int(endpoint_id),
