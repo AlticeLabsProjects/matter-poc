@@ -55,11 +55,18 @@ class Client(Connection):
         )
 
     def update_values(self, values, name=None):
+        print("UPDATE_VALUES")
+        print(values)
+        print(name)
+
         shadow = (
             self._shadow
             if name is None
             else self._nodes.setdefault(name, _Shadow(self, name))
         )
+
+        print("SHADOW")
+        print(shadow)
 
         shadow.update_values(values)
 
