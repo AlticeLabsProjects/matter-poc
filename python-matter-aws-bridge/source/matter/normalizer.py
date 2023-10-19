@@ -1,5 +1,3 @@
-import hashlib
-
 from chip.clusters import Objects as clusters_objects
 
 
@@ -12,17 +10,6 @@ def _get_attribute_id(attribute):
 
 
 _cluster_descriptor_id = _get_cluster_id(clusters_objects.Descriptor)
-
-_attribute_descriptor_vendor_id = _get_attribute_id(
-    clusters_objects.BasicInformation.Attributes.VendorID
-)
-_attribute_descriptor_product_id = _get_attribute_id(
-    clusters_objects.BasicInformation.Attributes.ProductID
-)
-_attribute_descriptor_serial_number_id = _get_attribute_id(
-    clusters_objects.BasicInformation.Attributes.SerialNumber
-)
-
 _cluster_basic_information_id = _get_cluster_id(clusters_objects.BasicInformation)
 _cluster_bridged_device_basic_information_id = _get_cluster_id(
     clusters_objects.BridgedDeviceBasicInformation
@@ -45,7 +32,7 @@ _allowed_clusters = [
     (
         "*",
         _cluster_basic_information_id,
-        _attribute_descriptor_vendor_id,
+        _get_attribute_id(clusters_objects.BasicInformation.Attributes.VendorID),
     ),
     (
         "*",
@@ -55,7 +42,7 @@ _allowed_clusters = [
     (
         "*",
         _cluster_basic_information_id,
-        _attribute_descriptor_product_id,
+        _get_attribute_id(clusters_objects.BasicInformation.Attributes.ProductID),
     ),
     (
         "*",
@@ -86,7 +73,7 @@ _allowed_clusters = [
     (
         "*",
         _cluster_bridged_device_basic_information_id,
-        _attribute_descriptor_serial_number_id,
+        _get_attribute_id(clusters_objects.BasicInformation.Attributes.SerialNumber),
     ),
     (
         "*",
@@ -172,36 +159,12 @@ def node_normalize(node):
     if not (node_id and isinstance(attributes, dict)):
         return None
 
-    vendor_id = attributes.get(
-        "0/{}/{}".format(
-            _cluster_basic_information_id, _attribute_descriptor_vendor_id
-        ),
-        None,
-    )
-    product_id = attributes.get(
-        "0/{}/{}".format(
-            _cluster_basic_information_id, _attribute_descriptor_product_id
-        ),
-        None,
-    )
-    serial_number = attributes.get(
-        "0/{}/{}".format(
-            _cluster_basic_information_id, _attribute_descriptor_serial_number_id
-        ),
-        None,
-    )
-
-    if vendor_id is None or product_id is None or serial_number is None:
-        return None
-
     allowed_attributes = dict(
         [attribute for attribute in attributes.items() if allowed_attribute(attribute)]
     )
 
     return (
-        hashlib.sha256(
-            "{}{}{}{}".format(node_id, vendor_id, product_id, serial_number).encode()
-        ).hexdigest(),
+        "node_{}".format(node_id),
         node_id,
         date_commissioned,
         available,

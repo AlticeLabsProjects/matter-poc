@@ -25,40 +25,20 @@ aws_update_queue = []
 fgw_info = None
 
 
-def node_id_from_key(node_key):
-    return next(iter([node_id for node_id in nodes if nodes[node_id] == node_key]))
+def node_id_from_shadow_name(shadow_name):
+    return next(iter([node_id for node_id in nodes if nodes[node_id] == shadow_name]))
 
 
-def on_aws_updated(node_key, values):
-    print(values)
-
-
-def on_aws_getted(node_key, values):
-    print(values)
-
-
-def on_aws_deleted(node_key, values):
-    global message_id
-
-    node_id = node_id_from_key(node_key)
-
-    send_websocker_message(
-        "remove_node",
-        str(message_id),
-        {"node_id": node_id},
-    )
-
-    message_id += 1
-
-
-def on_aws_delta_updated(node_key, delta):
+def on_aws_updated(shadow_name, values):
     try:
-        node_id = node_id_from_key(node_key)
+        node_id = node_id_from_shadow_name(shadow_name)
 
         allowed_attributes = dict(
             [
                 attribute
-                for attribute in (delta.state.get("attributes", None) or {}).items()
+                for attribute in (
+                    (values.state.desired or {}).get("attributes", None) or {}
+                ).items()
                 if matter_normalizer.allowed_attribute(attribute)
             ]
         )
@@ -79,6 +59,24 @@ def on_aws_delta_updated(node_key, delta):
 
     except Exception as error:
         print(error)
+
+
+def on_aws_getted(shadow_name, values):
+    print(values)
+
+
+def on_aws_deleted(shadow_name, values):
+    global message_id
+
+    node_id = node_id_from_shadow_name(shadow_name)
+
+    send_websocker_message(
+        "remove_node",
+        str(message_id),
+        {"node_id": node_id},
+    )
+
+    message_id += 1
 
 
 def on_aws_command(payload):
@@ -131,7 +129,7 @@ def on_websocket_message(client, message):
 
                 for normalized_node in normalized_nodes:
                     (
-                        node_key,
+                        shadow_name,
                         node_id,
                         date_commissioned,
                         available,
@@ -139,7 +137,7 @@ def on_websocket_message(client, message):
                     ) = normalized_node
 
                     try:
-                        nodes.setdefault(node_id, node_key)
+                        nodes.setdefault(node_id, shadow_name)
 
                         aws_client.update_values(
                             {
@@ -147,7 +145,7 @@ def on_websocket_message(client, message):
                                 "available": available,
                                 "attributes": attributes,
                             },
-                            node_key,
+                            shadow_name,
                         )
                     except Exception as error:
                         print(error)
@@ -157,13 +155,13 @@ def on_websocket_message(client, message):
             if event == "attribute_updated":
                 node_id, *attribute = json_payload["data"]
 
-                node_key = nodes.get(node_id, None)
+                shadow_name = nodes.get(node_id, None)
 
-                if node_key is not None and matter_normalizer.allowed_attribute(
+                if shadow_name is not None and matter_normalizer.allowed_attribute(
                     tuple(attribute)
                 ):
                     aws_client.update_values(
-                        {"attributes": dict([attribute])}, node_key
+                        {"attributes": dict([attribute])}, shadow_name
                     )
             elif event == "node_added" or event == "node_updated":
                 json_node = json_payload.get("data", {})
@@ -172,14 +170,14 @@ def on_websocket_message(client, message):
 
                 if normalized_node is not None:
                     (
-                        node_key,
+                        shadow_name,
                         node_id,
                         date_commissioned,
                         available,
                         attributes,
                     ) = normalized_node
 
-                    nodes.setdefault(node_id, node_key)
+                    nodes.setdefault(node_id, shadow_name)
 
                     aws_client.update_values(
                         {
@@ -187,7 +185,7 @@ def on_websocket_message(client, message):
                             "available": available,
                             "attributes": attributes,
                         },
-                        node_key,
+                        shadow_name,
                     )
 
             else:
@@ -292,11 +290,7 @@ def aws_client_connect():
     )
 
     aws_client = aws.Client(
-        thing_name=thing_name,
-        on_updated=on_aws_updated,
-        on_getted=on_aws_getted,
-        on_deleted=on_aws_deleted,
-        on_delta_updated=on_aws_delta_updated,
+        thing_name=thing_name, on_updated=on_aws_updated, on_deleted=on_aws_deleted
     )
 
     aws_client.connect(on_connected, on_aws_command)

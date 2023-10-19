@@ -12,17 +12,13 @@ class Client(Connection):
         self,
         thing_name,
         on_updated,
-        on_getted,
         on_deleted,
-        on_delta_updated,
     ):
         super().__init__(thing_name)
 
         self._nodes = dict()
         self._on_updated = on_updated
-        self._on_getted = on_getted
         self._on_deleted = on_deleted
-        self._on_delta_updated = on_delta_updated
 
     def connect(self, on_connected, on_command):
         try:
@@ -102,43 +98,12 @@ class _Shadow:
             subscribe_future(operation, "rejected", rejected_callback)
 
         subscribe("update", self._on_update_accepted, self._on_update_rejected)
-        subscribe("get", self._on_get_accepted, self._on_get_rejected)
         subscribe("delete", self._on_delete_accepted, self._on_delete_rejected)
-
-        shadow_client_subscribe_to = getattr(
-            self._shadow_client,
-            "subscribe_to{}_shadow_delta_updated_events".format(
-                "" if name is None else "_named"
-            ),
-        )
-
-        iotshadow_subscription_request = getattr(
-            iotshadow,
-            "{}ShadowDeltaUpdatedSubscriptionRequest".format(
-                "" if name is None else "Named"
-            ),
-        )
-
-        future, _ = shadow_client_subscribe_to(
-            request=iotshadow_subscription_request(
-                thing_name=client.thing_name, shadow_name=name
-            ),
-            qos=mqtt.QoS.AT_LEAST_ONCE,
-            callback=self._on_delta_updated,
-        )
-
-        future.result()
 
     def _on_update_accepted(self, response):
         self._client._on_updated(self._name, response)
 
     def _on_update_rejected(self, error):
-        print(error)
-
-    def _on_get_accepted(self, response):
-        self._client._on_getted(self._name, response)
-
-    def _on_get_rejected(self, error):
         print(error)
 
     def _on_delete_accepted(self, response):
@@ -153,9 +118,6 @@ class _Shadow:
     def _on_create_certificate_from_csr_rejected(self, error):
         print(error)
 
-    def _on_delta_updated(self, delta):
-        self._client._on_delta_updated(self._name, delta)
-
     def update_values(self, values):
         token = str(uuid4())
 
@@ -166,7 +128,7 @@ class _Shadow:
         request = iotshadow_update_shadow_request(
             thing_name=self._client.thing_name,
             shadow_name=self._name,
-            state=iotshadow.ShadowState(desired=values, reported=values),
+            state=iotshadow.ShadowState(reported=values),
             client_token=token,
         )
 
