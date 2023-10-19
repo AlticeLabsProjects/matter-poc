@@ -1,5 +1,6 @@
 import json
 from uuid import uuid4
+
 from awscrt import mqtt
 from awsiot import iotshadow
 

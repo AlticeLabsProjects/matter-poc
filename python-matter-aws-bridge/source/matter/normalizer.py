@@ -1,4 +1,5 @@
 import hashlib
+
 from chip.clusters import Objects as clusters_objects
 
 
@@ -10,7 +11,22 @@ def _get_attribute_id(attribute):
     return getattr(attribute, "attribute_id", None)
 
 
+_cluster_info_id = 0
+_attribute_info_name = 0
+_attribute_info_room_id = 1
+
 _cluster_descriptor_id = _get_cluster_id(clusters_objects.Descriptor)
+
+_attribute_descriptor_vendor_id = _get_attribute_id(
+    clusters_objects.BasicInformation.Attributes.VendorID
+)
+_attribute_descriptor_product_id = _get_attribute_id(
+    clusters_objects.BasicInformation.Attributes.ProductID
+)
+_attribute_descriptor_serial_number_id = _get_attribute_id(
+    clusters_objects.BasicInformation.Attributes.SerialNumber
+)
+
 _cluster_basic_information_id = _get_cluster_id(clusters_objects.BasicInformation)
 _cluster_bridged_device_basic_information_id = _get_cluster_id(
     clusters_objects.BridgedDeviceBasicInformation
@@ -19,17 +35,12 @@ _cluster_on_off_id = _get_cluster_id(clusters_objects.OnOff)
 _cluster_level_control_id = _get_cluster_id(clusters_objects.LevelControl)
 _cluster_color_control_id = _get_cluster_id(clusters_objects.ColorControl)
 
-_attribute_vendor_id = _get_attribute_id(
-    clusters_objects.BasicInformation.Attributes.VendorID
-)
-_attribute_product_id = _get_attribute_id(
-    clusters_objects.BasicInformation.Attributes.ProductID
-)
-_attribute_serial_number_id = _get_attribute_id(
-    clusters_objects.BasicInformation.Attributes.SerialNumber
-)
-
 _allowed_clusters = [
+    (
+        "*",
+        _cluster_info_id,
+        "*",
+    ),
     (
         "*",
         _cluster_descriptor_id,
@@ -43,7 +54,7 @@ _allowed_clusters = [
     (
         "*",
         _cluster_basic_information_id,
-        _attribute_vendor_id,
+        _attribute_descriptor_vendor_id,
     ),
     (
         "*",
@@ -53,7 +64,7 @@ _allowed_clusters = [
     (
         "*",
         _cluster_basic_information_id,
-        _attribute_product_id,
+        _attribute_descriptor_product_id,
     ),
     (
         "*",
@@ -84,7 +95,7 @@ _allowed_clusters = [
     (
         "*",
         _cluster_bridged_device_basic_information_id,
-        _attribute_serial_number_id,
+        _attribute_descriptor_serial_number_id,
     ),
     (
         "*",
@@ -171,13 +182,21 @@ def node_normalize(node):
         return None
 
     vendor_id = attributes.get(
-        "0/{}/{}".format(_cluster_basic_information_id, _attribute_vendor_id), None
+        "0/{}/{}".format(
+            _cluster_basic_information_id, _attribute_descriptor_vendor_id
+        ),
+        None,
     )
     product_id = attributes.get(
-        "0/{}/{}".format(_cluster_basic_information_id, _attribute_product_id), None
+        "0/{}/{}".format(
+            _cluster_basic_information_id, _attribute_descriptor_product_id
+        ),
+        None,
     )
     serial_number = attributes.get(
-        "0/{}/{}".format(_cluster_basic_information_id, _attribute_serial_number_id),
+        "0/{}/{}".format(
+            _cluster_basic_information_id, _attribute_descriptor_serial_number_id
+        ),
         None,
     )
 
@@ -203,6 +222,9 @@ def command_args_normalize(node_id, attribute):
     key, value = attribute
 
     endpoint_id, cluster_id, attribute_id = [int(value) for value in key.split("/")]
+
+    if cluster_id == _cluster_info_id:
+        return None
 
     args = {
         "endpoint_id": int(endpoint_id),

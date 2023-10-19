@@ -1,7 +1,8 @@
-from concurrent.futures import Future
 import json
+from concurrent.futures import Future
 from os import getenv
 from uuid import uuid4
+
 import requests
 from awscrt import mqtt
 from awsiot import iotidentity, mqtt_connection_builder
@@ -158,9 +159,9 @@ class Connection:
 
             try:
                 return self.__connect(self.thing_name, certificate_pem, private_key_pem)
-            except Exception as e:
-                print(e)
+            except Exception as error:
+                print(error)
 
                 return self.__connectWithClaim()
-        except Exception as e:
-            print(e)
+        except Exception as error:
+            print(error)

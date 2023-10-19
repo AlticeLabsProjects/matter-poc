@@ -58,24 +58,29 @@ def on_aws_delta_updated(node_key, delta):
         allowed_attributes = dict(
             [
                 attribute
-                for attribute in delta.state["attributes"].items()
+                for attribute in (delta.state.get("attributes", None) or {}).items()
                 if matter_normalizer.allowed_attribute(attribute)
             ]
         )
 
         for attribute in allowed_attributes.items():
-            global message_id
+            args = matter_normalizer.command_args_normalize(node_id, attribute)
 
-            send_websocker_message(
-                "device_command",
-                str(message_id),
-                matter_normalizer.command_args_normalize(node_id, attribute),
-            )
+            if args is not None:
+                global message_id
 
-            message_id += 1
+                send_websocker_message(
+                    "device_command",
+                    str(message_id),
+                    args,
+                )
 
-    except Exception as e:
-        print(e)
+                message_id += 1
+            else:
+                aws_client.update_values({"attributes": dict([attribute])}, node_key)
+
+    except Exception as error:
+        print(error)
 
 
 def on_aws_command(payload):

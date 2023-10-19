@@ -1,10 +1,11 @@
 import json
+from os import getcwd, makedirs, path
+
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import NameOID
-from os import path, getcwd, makedirs
 
 certificate_pem_store_key = "certificatePem"
 private_key_pem_store_key = "privateKeyPem"
@@ -65,8 +66,8 @@ def load_certificate(thing_name):
                 json_store[certificate_pem_store_key],
                 json_store[private_key_pem_store_key],
             )
-        except Exception as e:
-            print(e)
+        except Exception as error:
+            print(error)
         finally:
             if file_store is not None:
                 file_store.close()
@@ -91,8 +92,8 @@ def save_certificate(thing_name, certificate_pem, private_key_pem):
             },
             file_store,
         )
-    except Exception as e:
-        print(e)
+    except Exception as error:
+        print(error)
     finally:
         if file_store is not None:
             file_store.close()
