@@ -156,6 +156,9 @@ class _Shadow:
         self._client._on_delta_updated(self._name, delta)
 
     def update_values(self, values):
+        print("UPDATE!!!")
+        print(values)
+
         token = str(uuid4())
 
         iotshadow_update_shadow_request = getattr(
@@ -168,6 +171,8 @@ class _Shadow:
             state=iotshadow.ShadowState(desired=values, reported=values),
             client_token=token,
         )
+
+        print(request)
 
         publish_update_shadow = getattr(
             self._shadow_client,
