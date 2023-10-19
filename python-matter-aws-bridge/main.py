@@ -151,16 +151,19 @@ def on_websocket_message(client, message):
                     print("ID")
                     print(node_id)
 
-                    nodes.setdefault(node_id, node_key)
+                    try:
+                        nodes.setdefault(node_id, node_key)
 
-                    aws_client.update_values(
-                        {
-                            "commissionedDate": date_commissioned,
-                            "available": available,
-                            "attributes": attributes,
-                        },
-                        node_key,
-                    )
+                        aws_client.update_values(
+                            {
+                                "commissionedDate": date_commissioned,
+                                "available": available,
+                                "attributes": attributes,
+                            },
+                            node_key,
+                        )
+                    except Exception as error:
+                        print(error)
         else:
             event = json_payload.get("event", None)
 
