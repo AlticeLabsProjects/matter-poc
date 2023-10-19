@@ -58,7 +58,8 @@ class Client(Connection):
         shadow = (
             self._shadow
             if name is None
-            else self._nodes.setdefault(name, _Shadow(self, name))
+            else self._nodes.get(name, None)
+            or self._nodes.setdefault(name, _Shadow(self, name))
         )
 
         shadow.update_values(values)
