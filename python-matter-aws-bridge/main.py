@@ -40,7 +40,7 @@ def aws_on_command(payload):
         pass
 
     def on_commission_with_code(message, result, kargs):
-        pass
+        aws_client.publish_command("commission_with_code", kargs)
 
     def on_commission_on_network(message, result, kargs):
         pass
@@ -48,7 +48,7 @@ def aws_on_command(payload):
     def on_set_wifi_credentials(message, result, kargs):
         code = payload.get("code", None)
 
-        code in None or matter_client.send_message(
+        code is None or matter_client.send_message(
             command, {"code": code}, callback=on_commission_with_code
         )
 

@@ -28,8 +28,7 @@ class Client:
         self.send_message("start_listening")
 
     def __on_close(self, client, close_status_code, close_msg):
-        # self.connect()
-        pass
+        self.connect()
 
     def __on_message(self, client, message):
         json_message = json.loads(message)
@@ -41,9 +40,17 @@ class Client:
 
             self._on_message(message_id, result)
 
-            callback, message, kargs = self._stored_messages.pop(message_id, {None, {}})
+            callback, message, kargs = self._stored_messages.pop(
+                message_id, (None, None, None)
+            )
 
-            callback is None or callback(message, result, kargs)
+            if callback is not None:
+                [
+                    kargs.update({key: json_message.get(key, None)})
+                    for key in ["error_code", "details"]
+                ]
+
+                callback(message, result, kargs)
         else:
             event = json_message.get("event", None)
 
@@ -60,21 +67,21 @@ class Client:
     def connect(self):
         print("Connecting to {}".format(self._client.url))
 
-        self._client.run_forever(reconnect=10)
+        self._client.run_forever(reconnect=3)
 
-    def send_message(self, command, args={}, **kargs):
-        callback = kargs.get("callback", None)
+    def send_message(self, command, args=None, callback=None, **kargs):
+        message_id = str(self._stored_message_id)
 
         message = {
-            "message_id": self._stored_message_id,
+            "message_id": command if callback is None else message_id,
             "command": command,
-            "args": args,
         }
 
-        self._stored_messages.update(
-            {self._stored_message_id: (callback, message, kargs)}
-        )
+        args is None or message.update({"args": args})
 
-        self._stored_message_id += 1
+        if callback is not None:
+            self._stored_messages.update({message_id: (callback, message, kargs)})
+
+            self._stored_message_id += 1
 
         self._client.send(json.dumps(message))

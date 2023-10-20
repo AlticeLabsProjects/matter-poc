@@ -46,10 +46,10 @@ class Client(Connection):
         except Exception as error:
             print(error)
 
-    def publish_command(self, payload):
+    def publish_command(self, command, payload):
         self._mqtt_connection.publish(
             topic=self._command_topic,
-            payload=json.dumps(payload),
+            payload=json.dumps({"command": command, "payload": payload}),
             qos=mqtt.QoS.AT_LEAST_ONCE,
         )
 
