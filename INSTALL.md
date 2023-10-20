@@ -50,6 +50,7 @@ Clonar o projeto do GitHub:
 cd /root
 git clone https://github.com/AlticeLabsProjects/matter-poc.git
 ```
+_A [github personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) should be needed_
 
 # Construção da imagem do **python-fake-fgw**
 
