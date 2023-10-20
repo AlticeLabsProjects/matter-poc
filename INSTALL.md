@@ -6,7 +6,7 @@ O **python-matter-aws-bridge**, para se registar na **AWS**, precisa de informa�
 
 Na inexistência duma **Fiber Gateway**, como por exemplo, numa rede empresarial, será necessária a utilização da segunda componente, o **python-fake-fgw**. Esta componente irá devolver o número de série e mac address do equipamento em questão, como por exemplo, dum *RaspberryPI* ou *Dusum*.
 
-*Os passos seguintes referem a uma instalação na Dusum.*
+*Os passos seguintes referem a uma instalação na Dusum, em que já existe um Home Assistant instaldo e o Matter Server funciona como addon*
 
 ## Configuração do **Matter Server** no **Home Assistant**
 
