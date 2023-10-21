@@ -45,10 +45,14 @@ class Client:
             )
 
             if callback is not None:
-                [
-                    kargs.update({key: json_message.get(key, None)})
-                    for key in ["error_code", "details"]
-                ]
+                kargs.update(
+                    {
+                        "error_code": json_message.get("error_code", None),
+                        "error_message": json_message.get("details", "")
+                        .split(":")[-1]
+                        .strip(),
+                    }
+                )
 
                 callback(message, result, kargs)
         else:
