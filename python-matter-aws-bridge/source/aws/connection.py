@@ -18,9 +18,7 @@ from source.aws.certificate import (
 
 
 class Connection:
-    def __init__(self, thing_name):
-        self.thing_name = thing_name
-
+    def __init__(self):
         self._iot_endpoint = getenv("AWS_IOT_ENDPOINT")
         self._api_url = getenv("AWS_API_URL")
         self._template_name = getenv("AWS_TEMPLATE_NAME")
@@ -150,7 +148,9 @@ class Connection:
 
         return self.__connect(self.thing_name, certificate_pem, private_key_pem)
 
-    def connect(self):
+    def connect(self, thing_name):
+        self.thing_name = thing_name
+
         try:
             certificate_pem, private_key_pem = load_certificate(self.thing_name)
 
