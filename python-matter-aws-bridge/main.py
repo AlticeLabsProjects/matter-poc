@@ -36,19 +36,48 @@ def aws_on_connected():
 def aws_on_command(payload):
     command = payload.get("command", None)
 
-    def on_command(message, result, kargs):
-        command = message.get("command", None)
-        shadow_name = kargs.get("shadow_name", None)
+    def on_open_commissioning_window(message, result, kargs):
+        error_code = kargs.get("error_code")
 
-        aws_client.publish_command_accepted(command, result) if kargs.get(
-            "error_code"
-        ) is None else aws_client.publish_command_rejected(command, kargs)
+        if error_code is None:
+            code, *args = result
+
+            aws_client.publish_command_accepted(
+                kargs.get("uuid", None),
+                {
+                    "code": code,
+                },
+            )
+        else:
+            aws_client.publish_command_rejected(
+                kargs.get("uuid", None),
+                {
+                    "errorCode": error_code,
+                    "errorMessage": kargs.get("error_message", None),
+                },
+            )
+
+    def on_commissioning(message, result, kargs):
+        error_code = kargs.get("error_code")
+
+        if error_code is None:
+            aws_client.publish_command_accepted(
+                kargs.get("uuid", None),
+            )
+        else:
+            aws_client.publish_command_rejected(
+                kargs.get("uuid", None),
+                {
+                    "errorCode": error_code,
+                    "errorMessage": result.get("error_message", None),
+                },
+            )
 
     def on_set_wifi_credentials(message, result, kargs):
         code = payload.get("code", None)
 
         code is None or matter_client.send_message(
-            command, {"code": code}, callback=on_command
+            command, {"code": code}, callback=on_commissioning
         )
 
     if "open_commissioning_window" in command:
@@ -58,7 +87,12 @@ def aws_on_command(payload):
             node_id = node_id_from_shadow_name(shadow_name)
 
             matter_client.send_message(
-                command, {"node_id": node_id}, callback=on_command
+                command,
+                {
+                    "node_id": node_id,
+                },
+                callback=on_open_commissioning_window,
+                uuid=payload.get("uuid", None),
             )
     if "commission_with_code" in command:
         ssid = payload.get("ssid", None)
@@ -66,16 +100,23 @@ def aws_on_command(payload):
 
         ssid is None or credentials is None or matter_client.send_message(
             "set_wifi_credentials",
-            {"ssid": ssid, "credentials": credentials},
+            {
+                "ssid": ssid,
+                "credentials": credentials,
+            },
             callback=on_set_wifi_credentials,
+            uuid=payload.get("uuid", None),
         )
     elif "commission_on_network" in command:
         setup_pin_code = payload.get("setupPinCode", None)
 
         setup_pin_code in None or matter_client.send_message(
             command,
-            {"setup_pin_code": setup_pin_code},
-            callback=on_command,
+            {
+                "setup_pin_code": setup_pin_code,
+            },
+            callback=on_commissioning,
+            uuid=payload.get("uuid", None),
         )
 
 

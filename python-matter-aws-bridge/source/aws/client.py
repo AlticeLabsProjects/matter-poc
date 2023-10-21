@@ -23,10 +23,13 @@ class Client(Connection):
         self._on_updated = on_updated
         self._on_deleted = on_deleted
 
-    def __publish_command(self, shadow_name, command, payload, result):
+    def __publish_command(self, action, uuid, payload={}):
         self._mqtt_connection.publish(
-            topic="{}/name/{}/{}".format(self._command_topic, shadow_name, result),
-            payload=json.dumps({"command": command, "payload": payload}),
+            topic="{}/{}".format(
+                self._command_topic,
+                action,
+            ),
+            payload=json.dumps({"uuid": uuid, "payload": payload}),
             qos=mqtt.QoS.AT_LEAST_ONCE,
         )
 
@@ -53,11 +56,11 @@ class Client(Connection):
         except Exception as error:
             print(error)
 
-    def publish_command_accepted(self, shadow_name, command, payload):
-        self.__publish_command(shadow_name, command, payload, "accepted")
+    def publish_command_accepted(self, uuid, payload={}):
+        self.__publish_command("accepted", uuid, payload)
 
-    def publish_command_rejected(self, shadow_name, command, payload):
-        self.__publish_command(shadow_name, command, payload, "rejected")
+    def publish_command_rejected(self, uuid, payload={}):
+        self.__publish_command("rejected", uuid, payload)
 
     def update_values(self, values, shadow_name=None):
         shadow = (
