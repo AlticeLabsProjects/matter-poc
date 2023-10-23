@@ -35,6 +35,7 @@ def aws_on_connected():
 
 def aws_on_command(payload):
     command = payload.get("command", None)
+    uuid = payload.get("uuid", None)
 
     def on_open_commissioning_window(message, result, kargs):
         error_code = kargs.get("error_code")
@@ -74,7 +75,7 @@ def aws_on_command(payload):
             )
 
     def on_set_wifi_credentials(message, result, kargs):
-        code = payload.get("code", None)
+        code = kargs.get("code", None)
 
         code is None or matter_client.send_message(
             command, {"code": code}, callback=on_commissioning
@@ -92,21 +93,31 @@ def aws_on_command(payload):
                     "node_id": node_id,
                 },
                 callback=on_open_commissioning_window,
-                uuid=payload.get("uuid", None),
+                uuid=uuid,
             )
     if "commission_with_code" in command:
-        ssid = payload.get("ssid", None)
-        credentials = payload.get("credentials", None)
+        code = payload.get("code", None)
 
-        ssid is None or credentials is None or matter_client.send_message(
-            "set_wifi_credentials",
-            {
-                "ssid": ssid,
-                "credentials": credentials,
-            },
-            callback=on_set_wifi_credentials,
-            uuid=payload.get("uuid", None),
-        )
+        if code is not None:
+            ssid = payload.get("ssid", None)
+            credentials = payload.get("credentials", None)
+
+            if ssid is None or credentials is None:
+                code is None or matter_client.send_message(
+                    command, {"code": code}, callback=on_commissioning
+                )
+            else:
+                matter_client.send_message(
+                    "set_wifi_credentials",
+                    {
+                        "ssid": ssid,
+                        "credentials": credentials,
+                    },
+                    callback=on_set_wifi_credentials,
+                    code=code,
+                    uuid=uuid,
+                )
+
     elif "commission_on_network" in command:
         setup_pin_code = payload.get("setupPinCode", None)
 
@@ -116,7 +127,7 @@ def aws_on_command(payload):
                 "setup_pin_code": setup_pin_code,
             },
             callback=on_commissioning,
-            uuid=payload.get("uuid", None),
+            uuid=uuid,
         )
 
 
