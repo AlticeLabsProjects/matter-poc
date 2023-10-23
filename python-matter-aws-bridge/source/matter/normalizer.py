@@ -172,68 +172,118 @@ def node_normalize(node):
     )
 
 
-def command_args_normalize(node_id, attribute):
-    key, value = attribute
+def command_args_normalize(node_id, allowed_attributes):
+    commands = []
+    attributes = {}
 
-    endpoint_id, cluster_id, attribute_id = [int(value) for value in key.split("/")]
+    for key, value in allowed_attributes.items():
+        endpoint_id, cluster_id, attribute_id = [int(value) for value in key.split("/")]
 
-    args = {
-        "endpoint_id": int(endpoint_id),
-        "node_id": node_id,
-        "cluster_id": cluster_id,
-    }
+        ((attributes.setdefault(endpoint_id, {})).setdefault(cluster_id, {})).update(
+            {attribute_id: value}
+        )
 
-    def check_cluster_id(cluster):
-        return cluster_id == _get_cluster_id(cluster)
+    for endpoint_id, clusters in attributes.items():
 
-    def check_attribute_id(attribute):
-        return attribute_id == _get_attribute_id(attribute)
+        def add_command(cluster, command, payload={}):
+            commands.append(
+                {
+                    "endpoint_id": endpoint_id,
+                    "node_id": node_id,
+                    "cluster_id": _get_cluster_id(cluster),
+                    "command_name": command.__name__,
+                    "payload": payload,
+                }
+            )
 
-    def args_command(command, payload={}):
-        return {"command_name": command.__name__, "payload": payload}
+        on_off_cluster = clusters.get(_get_cluster_id(clusters_objects.OnOff), None)
 
-    if check_cluster_id(clusters_objects.OnOff):
-        if check_attribute_id(clusters_objects.OnOff.Attributes.OnOff):
-            args.update(
-                args_command(
+        if on_off_cluster is not None:
+            on_off_attribute = on_off_cluster.get(
+                _get_attribute_id(clusters_objects.OnOff.Attributes.OnOff), None
+            )
+
+            if on_off_attribute is not None:
+                add_command(
+                    clusters_objects.OnOff,
                     clusters_objects.OnOff.Commands.On
-                    if value
-                    else clusters_objects.OnOff.Commands.Off
+                    if on_off_attribute
+                    else clusters_objects.OnOff.Commands.Off,
                 )
-            )
-    elif check_cluster_id(clusters_objects.LevelControl):
-        if check_attribute_id(clusters_objects.LevelControl.Attributes.CurrentLevel):
-            args.update(
-                args_command(
-                    clusters_objects.LevelControl.Commands.MoveToLevelWithOnOff,
-                    {"level": value},
-                )
-            )
-    elif check_cluster_id(clusters_objects.ColorControl):
-        if check_attribute_id(clusters_objects.ColorControl.Attributes.CurrentHue):
-            args.update(
-                args_command(
-                    clusters_objects.ColorControl.Commands.MoveToHue,
-                    {"hue": value},
-                )
-            )
-        elif check_attribute_id(
-            clusters_objects.ColorControl.Attributes.CurrentSaturation
-        ):
-            args.update(
-                args_command(
-                    clusters_objects.ColorControl.Commands.MoveToSaturation,
-                    {"saturation": value},
-                )
-            )
-        elif check_attribute_id(
-            clusters_objects.ColorControl.Attributes.ColorTemperatureMireds
-        ):
-            args.update(
-                args_command(
-                    clusters_objects.ColorControl.Commands.MoveToColorTemperature,
-                    {"colorTemperatureMireds": value},
-                )
+
+        level_control_cluster = clusters.get(
+            _get_cluster_id(clusters_objects.LevelControl), None
+        )
+
+        if level_control_cluster is not None:
+            current_level_attribute = level_control_cluster.get(
+                _get_attribute_id(
+                    clusters_objects.LevelControl.Attributes.CurrentLevel
+                ),
+                None,
             )
 
-    return args
+            if current_level_attribute is not None:
+                add_command(
+                    clusters_objects.LevelControl,
+                    clusters_objects.LevelControl.Commands.MoveToLevelWithOnOff,
+                    {"level": current_level_attribute},
+                )
+
+        color_control_cluster = clusters.get(
+            _get_cluster_id(clusters_objects.ColorControl), None
+        )
+
+        if color_control_cluster is not None:
+            current_hue_attribute = color_control_cluster.get(
+                _get_attribute_id(clusters_objects.ColorControl.Attributes.CurrentHue),
+                None,
+            )
+
+            current_saturation_attribute = color_control_cluster.get(
+                _get_attribute_id(
+                    clusters_objects.ColorControl.Attributes.CurrentSaturation
+                ),
+                None,
+            )
+
+            if (
+                current_hue_attribute is not None
+                and current_saturation_attribute is not None
+            ):
+                add_command(
+                    clusters_objects.ColorControl,
+                    clusters_objects.ColorControl.Commands.MoveToHueAndSaturation,
+                    {
+                        "hue": current_hue_attribute,
+                        "saturation": current_saturation_attribute,
+                    },
+                )
+            elif current_hue_attribute is not None:
+                add_command(
+                    clusters_objects.ColorControl,
+                    clusters_objects.ColorControl.Commands.MoveToHue,
+                    {"hue": current_hue_attribute},
+                )
+            elif current_saturation_attribute is not None:
+                add_command(
+                    clusters_objects.ColorControl,
+                    clusters_objects.ColorControl.Commands.MoveToSaturation,
+                    {"saturation": current_saturation_attribute},
+                )
+            else:
+                color_temperature_mireds_attribute = color_control_cluster.get(
+                    _get_attribute_id(
+                        clusters_objects.ColorControl.Attributes.ColorTemperatureMireds
+                    ),
+                    None,
+                )
+
+                if color_temperature_mireds_attribute is not None:
+                    add_command(
+                        clusters_objects.ColorControl,
+                        clusters_objects.ColorControl.Commands.MoveToColorTemperature,
+                        {"colorTemperatureMireds": color_temperature_mireds_attribute},
+                    )
+
+    return commands

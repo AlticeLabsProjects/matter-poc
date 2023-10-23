@@ -109,7 +109,7 @@ def aws_on_command(payload):
                     on_set_wifi_credentials,
                     code=code,
                 )
-                
+
     elif "commission_on_network" in command:
         setup_pin_code = payload.get("setupPinCode", None)
 
@@ -136,10 +136,10 @@ def aws_on_updated(shadow_name, values):
             ]
         )
 
-        for attribute in allowed_attributes.items():
-            args = matter_normalizer.command_args_normalize(node_id, attribute)
-
-            args is None or matter_client.send_message("device_command", args)
+        for command in matter_normalizer.command_args_normalize(
+            node_id, allowed_attributes
+        ):
+            matter_client.send_message("device_command", command)
 
     except Exception as error:
         print(error)
