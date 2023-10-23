@@ -40,12 +40,12 @@ class Client:
 
             self._on_message(message_id, result)
 
-            callback, message, kargs = self._stored_messages.pop(
+            callback, message, args = self._stored_messages.pop(
                 message_id, (None, None, None)
             )
 
             if callback is not None:
-                kargs.update(
+                args.update(
                     {
                         "error_code": json_message.get("error_code", None),
                         "error_message": json_message.get("details", "")
@@ -54,7 +54,7 @@ class Client:
                     }
                 )
 
-                callback(message, result, kargs)
+                callback(message, result, args)
         else:
             event = json_message.get("event", None)
 
