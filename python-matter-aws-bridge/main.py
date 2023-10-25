@@ -9,12 +9,6 @@ import source.matter.normalizer as matter_normalizer
 
 load_dotenv()
 
-nodes = {}
-
-
-def node_id_from_shadow_name(shadow_name):
-    return next(iter([node_id for node_id in nodes if nodes[node_id] == shadow_name]))
-
 
 def fgw_updated():
     matter_client.connect()
@@ -80,7 +74,7 @@ def aws_on_command(payload):
         shadow_name = payload.get("shadowName", None)
 
         if shadow_name is not None:
-            node_id = node_id_from_shadow_name(shadow_name)
+            node_id = matter_normalizer.node_id_from_shadow_name(shadow_name)
 
             matter_client.send_message(
                 command,
@@ -124,29 +118,30 @@ def aws_on_command(payload):
 
 def aws_on_updated(shadow_name, values):
     try:
-        node_id = node_id_from_shadow_name(shadow_name)
+        if shadow_name is not None:
+            node_id = matter_normalizer.node_id_from_shadow_name(shadow_name)
 
-        allowed_attributes = dict(
-            [
-                attribute
-                for attribute in (
-                    (values.state.desired or {}).get("attributes", None) or {}
-                ).items()
-                if matter_normalizer.allowed_attribute(attribute)
-            ]
-        )
+            allowed_attributes = dict(
+                [
+                    attribute
+                    for attribute in (
+                        (values.state.desired or {}).get("attributes", None) or {}
+                    ).items()
+                    if matter_normalizer.allowed_attribute(attribute)
+                ]
+            )
 
-        for command in matter_normalizer.command_args_normalize(
-            node_id, allowed_attributes
-        ):
-            matter_client.send_message("device_command", command)
+            for command in matter_normalizer.command_args_normalize(
+                node_id, allowed_attributes
+            ):
+                matter_client.send_message("device_command", command)
 
     except Exception as error:
         print(error)
 
 
 def aws_on_deleted(shadow_name, values):
-    node_id = node_id_from_shadow_name(shadow_name)
+    node_id = matter_normalizer.node_id_from_shadow_name(shadow_name)
 
     matter_client.send_message("remove_node", {"node_id": node_id})
 
@@ -177,7 +172,6 @@ def matter_on_message(message_id, result):
 
         for normalized_node in normalized_nodes:
             (
-                shadow_name,
                 node_id,
                 date_commissioned,
                 available,
@@ -185,15 +179,13 @@ def matter_on_message(message_id, result):
             ) = normalized_node
 
             try:
-                nodes.setdefault(node_id, shadow_name)
-
                 aws_client.update_values(
                     {
                         "commissionedDate": date_commissioned,
                         "available": available,
                         "attributes": attributes,
                     },
-                    shadow_name,
+                    matter_normalizer.shadow_name_from_node_id(node_id),
                 )
             except Exception as error:
                 print(error)
@@ -203,25 +195,21 @@ def matter_on_event(event, data):
     if event == "attribute_updated":
         node_id, *attribute = data
 
-        shadow_name = nodes.get(node_id, None)
-
-        if shadow_name is not None and matter_normalizer.allowed_attribute(
-            tuple(attribute)
-        ):
-            aws_client.update_values({"attributes": dict([attribute])}, shadow_name)
+        if matter_normalizer.allowed_attribute(tuple(attribute)):
+            aws_client.update_values(
+                {"attributes": dict([attribute])},
+                matter_normalizer.shadow_name_from_node_id(node_id),
+            )
     elif event in ["node_added", "node_updated"]:
         normalized_node = matter_normalizer.node_normalize(data)
 
         if normalized_node is not None:
             (
-                shadow_name,
                 node_id,
                 date_commissioned,
                 available,
                 attributes,
             ) = normalized_node
-
-            nodes.setdefault(node_id, shadow_name)
 
             aws_client.update_values(
                 {
@@ -229,7 +217,7 @@ def matter_on_event(event, data):
                     "available": available,
                     "attributes": attributes,
                 },
-                shadow_name,
+                matter_normalizer.shadow_name_from_node_id(node_id),
             )
 
 

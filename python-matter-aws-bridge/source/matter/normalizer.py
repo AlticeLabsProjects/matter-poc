@@ -9,6 +9,14 @@ def _get_attribute_id(attribute):
     return getattr(attribute, "attribute_id", None)
 
 
+def node_id_from_shadow_name(shadow_name):
+    return shadow_name.split("_")[1]
+
+
+def shadow_name_from_node_id(node_id):
+    return "node_{}".format(node_id)
+
+
 _cluster_descriptor_id = _get_cluster_id(clusters_objects.Descriptor)
 _cluster_basic_information_id = _get_cluster_id(clusters_objects.BasicInformation)
 _cluster_bridged_device_basic_information_id = _get_cluster_id(
@@ -164,7 +172,6 @@ def node_normalize(node):
     )
 
     return (
-        "node_{}".format(node_id),
         node_id,
         date_commissioned,
         available,
