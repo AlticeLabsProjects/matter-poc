@@ -98,7 +98,7 @@ _A [github personal access token](https://docs.github.com/en/authentication/keep
 # Construção da imagem do **python-fake-fgw**
 
 ```
-cd /root/matter-poc/python-fake-fgw
+cd ~/matter-poc/python-fake-fgw
 DOCKER_BUILDKIT=1 docker build --tag python-fake-fgw .
 docker run --detach --restart unless-stopped --network host --privileged --name python-fake-fgw python-fake-fgw
 ```
@@ -110,7 +110,7 @@ Com isto, ficamos com um serviço http à escuta na porta 5000.
 *Atenção às duas variáveis de ambiente para utilizar o **python-fake-fgw***
 
 ```
-cd /root/matter-poc/python-matter-aws-bridge
+cd ~/matter-poc/python-matter-aws-bridge
 DOCKER_BUILDKIT=1 docker build --tag python-matter-aws-bridge .
 docker run --detach --restart unless-stopped --env FGW_HOST=127.0.0.1 --env FGW_PORT=5000 --network host --name python-matter-aws-bridge python-matter-aws-bridge
 ```
@@ -122,7 +122,7 @@ Se tudo correr bem, neste momento, temos um thing na **AWS**.
 ```
 docker stop python-matter-aws-bridge
 docker rm python-matter-aws-bridge
-cd /root/matter-poc
+cd ~/matter-poc
 git pull
 ```
 
