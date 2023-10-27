@@ -36,6 +36,49 @@ Garantir se o "Use the official Matter Server Supervisor add-on" está seleciona
 
 Assim que o serviço tiver arrancado, algo que demora algum tempo, continuamos com a instalação.
 
+# Instalação num Raspberry PI 4
+
+Uma vez que no Raspberry não existe o Home Assistant nem o Docker instalado, será necessário fazer a instação dos mesmos seguindos os dois passos seguintes.
+
+## Instalação do Docker no Raspberry PI 4
+
+Seguir os passos na [página do Docker](https://docs.docker.com/engine/install/ubuntu/)
+
+```
+# Adicionar a chave GPG oficial do Docker:
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Adicionar o repositório das fontes Apt:
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+## Instalação do Matter Server no Raspberry PI 4
+
+Seguir os passos na [página do Python Matter Server](https://github.com/home-assistant-libs/python-matter-server)
+
+```
+cd ~
+mkdir matter-server
+docker run -d \
+  --name matter-server \
+  --restart=unless-stopped \
+  --security-opt apparmor=unconfined \
+  -v $(pwd)/matter-server:/data \
+  -v /run/dbus:/run/dbus:ro \
+  --network=host \
+  ghcr.io/home-assistant-libs/python-matter-server:stable
+```
+
 # Código para a criação das imagens do Docker
 
 Fazer ssh à máquina da *Dusum* com o username e password root:
@@ -47,10 +90,10 @@ ssh root@192.168.1.xxx
 Clonar o projeto do GitHub:
 
 ```
-cd /root
+cd ~
 git clone https://github.com/AlticeLabsProjects/matter-poc.git
 ```
-_A [github personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) should be needed_
+_A [github personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) será necessária_
 
 # Construção da imagem do **python-fake-fgw**
 
