@@ -15,20 +15,22 @@ class Client:
 
         websocket.enableTrace(True)
 
+        def on_open(client):
+            print("MATTER OPEN")
+
+            self.send_message("start_listening")
+
+        def on_close(client, close_status_code, close_msg):
+            print("MATTER CLOSE:", close_status_code, close_msg)
+
+            self.connect()
+
         self._client = websocket.WebSocketApp(
             "ws://{}:{}/ws".format(getenv("WS_HOST"), getenv("WS_PORT")),
-            on_open=self.__on_open,
-            on_close=self.__on_close,
+            on_open=on_open,
+            on_close=on_close,
             on_message=self.__on_message,
         )
-
-    def __on_open(self, client):
-        print("Connected to {}".format(self._client.url))
-
-        self.send_message("start_listening")
-
-    def __on_close(self, client, close_status_code, close_msg):
-        self.connect()
 
     def __on_message(self, client, message):
         json_message = json.loads(message)
@@ -69,7 +71,7 @@ class Client:
                 self._on_initialized()
 
     def connect(self):
-        print("Connecting to {}".format(self._client.url))
+        print("MATTER CONNECTING TO {}".format(self._client.url))
 
         self._client.run_forever(reconnect=3)
 

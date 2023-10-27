@@ -22,9 +22,10 @@ class Connection:
         self._iot_endpoint = getenv("AWS_IOT_ENDPOINT")
         self._api_url = getenv("AWS_API_URL")
         self._template_name = getenv("AWS_TEMPLATE_NAME")
+        self._connected = False
 
     def __downloadClaim(self):
-        print("Connecting to {}".format(self._api_url))
+        print("AWS API CONNECTING TO {}".format(self._api_url))
 
         response = requests.get(self._api_url)
 
@@ -41,20 +42,44 @@ class Connection:
         raise Exception("Cannot get claim certificate")
 
     def __connect(self, client_id, certificate_pem, private_key_pem):
-        print("Connecting to {}".format(self._iot_endpoint))
+        print("AWS CONNECTING TO {}".format(self._iot_endpoint))
 
-        mqtt_connection = mqtt_connection_builder.mtls_from_bytes(
+        def on_connection_interrupted(connection, error, **kwargs):
+            print("AWS CONNECTION INTERRUPTED:", error, kwargs)
+
+        def on_connection_resumed(connection, return_code, session_present, **kwargs):
+            print("AWS CONNECTION RESUMED:", return_code, session_present, kwargs)
+
+        def on_connection_success(connection, callback_data):
+            print("AWS CONNECTION SUCCESS:", callback_data)
+
+            self._connected = True
+
+        def on_connection_failure(connection, callback_data):
+            print("AWS CONNECTION FAILURE:", callback_data)
+
+        def on_connection_closed(connection, callback_data):
+            print("AWS CONNECTION CLOSED:", callback_data)
+
+            self._connected = False
+
+        self._mqtt_connection = mqtt_connection_builder.mtls_from_bytes(
             endpoint=self._iot_endpoint,
             cert_bytes=bytes(certificate_pem, "utf-8"),
             pri_key_bytes=bytes(private_key_pem, "utf-8"),
             client_id=client_id,
             clean_session=True,
             keep_alive_secs=30,
+            on_connection_interrupted=on_connection_interrupted,
+            on_connection_resumed=on_connection_resumed,
+            on_connection_success=on_connection_success,
+            on_connection_failure=on_connection_failure,
+            on_connection_closed=on_connection_closed,
         )
 
-        mqtt_connection.connect().result()
+        self._mqtt_connection.connect().result()
 
-        return mqtt_connection
+        return self._mqtt_connection
 
     def __create_certificate_from_csr(self, identity):
         accepted_future = Future()
@@ -149,6 +174,9 @@ class Connection:
         return self.__connect(self.thing_name, certificate_pem, private_key_pem)
 
     def connect(self, thing_name):
+        if self._connected:
+            return self._mqtt_connection
+
         self.thing_name = thing_name
 
         try:

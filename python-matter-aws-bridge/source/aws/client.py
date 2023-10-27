@@ -72,9 +72,17 @@ class Client(Connection):
 
         shadow.update_values(values)
 
+    def remove_values(self, shadow_name):
+        shadow = self._nodes.pop(shadow_name, None)
+
+        if shadow is not None:
+            shadow.remove_values()
+
 
 class _Shadow:
     def __init__(self, client, shadow_name=None):
+        print("SHADOW CREATED:", shadow_name)
+
         self._shadow_name = shadow_name
         self._is_named = shadow_name is not None
         self._client = client
@@ -112,43 +120,52 @@ class _Shadow:
         subscribe("update", self._on_update_accepted, self._on_update_rejected)
         subscribe("delete", self._on_delete_accepted, self._on_delete_rejected)
 
-    def _on_update_accepted(self, response):
-        self._client._on_updated(self._shadow_name, response)
-
-    def _on_update_rejected(self, error):
-        print(error)
-
-    def _on_delete_accepted(self, response):
-        self._client._on_deleted(self._shadow_name, response)
-
-    def _on_delete_rejected(self, error):
-        print(error)
-
-    def _on_create_certificate_from_csr_accepted(self, response):
-        print(response)
-
-    def _on_create_certificate_from_csr_rejected(self, error):
-        print(error)
-
-    def update_values(self, values):
+    def _publish(self, action, values=None):
         token = str(uuid4())
 
-        iotshadow_update_shadow_request = getattr(
-            iotshadow, "Update{}ShadowRequest".format("Named" if self._is_named else "")
+        iotshadow_shadow_request = getattr(
+            iotshadow,
+            "{}{}ShadowRequest".format(action, "Named" if self._is_named else ""),
         )
 
-        request = iotshadow_update_shadow_request(
+        request = iotshadow_shadow_request(
             thing_name=self._client.thing_name,
             shadow_name=self._shadow_name,
-            state=iotshadow.ShadowState(reported=values),
+            state=None if values is None else iotshadow.ShadowState(reported=values),
             client_token=token,
         )
 
-        publish_update_shadow = getattr(
+        publish_shadow = getattr(
             self._shadow_client,
-            "publish_update{}_shadow".format("_named" if self._is_named else ""),
+            "publish_{}{}_shadow".format(
+                action.lower(), "_named" if self._is_named else ""
+            ),
         )
 
-        future = publish_update_shadow(request, mqtt.QoS.AT_LEAST_ONCE)
+        publish_shadow(request, mqtt.QoS.AT_LEAST_ONCE).result()
 
-        future.result()
+    def _on_update_accepted(self, response):
+        print("UPDATE ACCEPTED:", self._shadow_name, response)
+
+        self._client._on_updated(self._shadow_name, response)
+
+    def _on_update_rejected(self, error):
+        print("UPDATE REJECTED:", self._shadow_name, error)
+
+    def _on_delete_accepted(self, response):
+        print("DELETE ACCEPTED:", self._shadow_name, response)
+
+        self._client._on_deleted(self._shadow_name, response)
+
+    def _on_delete_rejected(self, error):
+        print("DELETE REJECTED:", self._shadow_name, error)
+
+    def update_values(self, values=None):
+        print("AWS PUBLISH:", self._shadow_name, values)
+
+        self._publish("Update", values)
+
+    def remove_values(self):
+        print("AWS SHADOW REMOVE:", self._shadow_name)
+
+        self._publish("Delete")

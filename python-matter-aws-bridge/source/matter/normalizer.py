@@ -10,7 +10,7 @@ def _get_attribute_id(attribute):
 
 
 def node_id_from_shadow_name(shadow_name):
-    return shadow_name.split("_")[1]
+    return shadow_name.split("_")[-1]
 
 
 def shadow_name_from_node_id(node_id):
@@ -161,7 +161,7 @@ def allowed_attribute(attribute):
 def node_normalize(node):
     node_id = node.get("node_id", None)
     date_commissioned = node.get("date_commissioned", None)
-    available = node.get("available", None)
+    available = node.get("available", False)
     attributes = node.get("attributes", {})
 
     if not (node_id and isinstance(attributes, dict)):

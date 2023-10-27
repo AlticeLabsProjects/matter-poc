@@ -211,14 +211,18 @@ def matter_on_event(event, data):
                 attributes,
             ) = normalized_node
 
-            aws_client.update_values(
-                {
-                    "commissionedDate": date_commissioned,
-                    "available": available,
-                    "attributes": attributes,
-                },
-                matter_normalizer.shadow_name_from_node_id(node_id),
-            )
+            if (event == "node_added") or available:
+                aws_client.update_values(
+                    {
+                        "commissionedDate": date_commissioned,
+                        "available": available,
+                        "attributes": attributes,
+                    },
+                    matter_normalizer.shadow_name_from_node_id(node_id),
+                )
+
+    elif event == "node_removed":
+        aws_client.remove_values(matter_normalizer.shadow_name_from_node_id(data))
 
 
 matter_client = matter.Client(matter_on_initialized, matter_on_message, matter_on_event)
