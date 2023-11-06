@@ -2,6 +2,8 @@ https://wiki.rdkcentral.com/display/ASP/Quickstart%3A+Building%2C+Installing+and
 
 https://docs.yoctoproject.org/ref-manual/system-requirements.html#ubuntu-and-debian
 
+https://github.com/rdkcentral/BundleGen/blob/master/Vagrantfile
+
 ## Instalação do BundleGen
 
 git clone https://github.com/rdkcentral/BundleGen.git
