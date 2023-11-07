@@ -7,7 +7,9 @@ In a fresh installed Ubuntu 18.04 Server machine, follow this steps to be able t
 ```sh
 cd ~
 
-wget https://github.com/AlticeLabsProjects/matter-poc/blob/baca0ac4b7bdbf82ca938ac35e33d47bf579f10d/gen10/rdk-generic-reference-image-2023-08-04-raspberrypi-rdk-hybrid-generic.wic.bz2 -O raspberrypi-rdk-hybrid-generic.wic.bz2
+sudo apt install bmap-tools
+
+bmaptool copy rdk-generic-reference-image-2023-08-04-raspberrypi-rdk-hybrid-generic.wic.bz2 /dev/sdX
 ```
 
 ## Dunfell installation
