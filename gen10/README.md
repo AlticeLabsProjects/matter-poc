@@ -82,7 +82,7 @@ cd ../meta-coverity/classes
 cp coverity.bbclass ../../meta-dac-sdk/classes
 cd ..
 cp -r lib ../meta-dac-sdk
-echo 'MACHINE="raspberrypi3"'' >> conf/local.conf
+echo 'MACHINE="raspberrypi3"' >> conf/local.conf
 echo 'DISTRO_FEATURES:append = "virtualization"' >> conf/local.conf
 ```
 
