@@ -12,8 +12,10 @@ sudo apt install bmap-tools
 
 bzip2 -d rdk-generic-reference-image-2023-08-04-raspberrypi-rdk-hybrid-generic.wic.bz2
 
-bmaptool copy rdk-generic-reference-image-2023-08-04-raspberrypi-rdk-hybrid-generic.wic.bz2 /dev/sdX
+bmaptool copy --nobmap rdk-generic-reference-image-2023-08-04-raspberrypi-rdk-hybrid-generic.wic.bz2 /dev/sdX
 ```
+
+_Note: Using a virtual machine, the sd device may not be available. In this case, use an alternative method_ 
 
 ## Dunfell installation
 
