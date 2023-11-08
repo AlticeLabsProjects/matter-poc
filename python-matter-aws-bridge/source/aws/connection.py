@@ -22,7 +22,7 @@ class Connection:
         self._iot_endpoint = getenv("AWS_IOT_ENDPOINT")
         self._api_url = getenv("AWS_API_URL")
         self._template_name = getenv("AWS_TEMPLATE_NAME")
-        self._connected = False
+        self._mqtt_connection = None
 
     def __downloadClaim(self):
         print("AWS API CONNECTING TO {}".format(self._api_url))
@@ -53,17 +53,15 @@ class Connection:
         def on_connection_success(connection, callback_data):
             print("AWS CONNECTION SUCCESS:", callback_data)
 
-            self._connected = True
-
         def on_connection_failure(connection, callback_data):
             print("AWS CONNECTION FAILURE:", callback_data)
 
         def on_connection_closed(connection, callback_data):
             print("AWS CONNECTION CLOSED:", callback_data)
 
-            self._connected = False
+            self._mqtt_connection = None
 
-        self._mqtt_connection = mqtt_connection_builder.mtls_from_bytes(
+        mqtt_connection = mqtt_connection_builder.mtls_from_bytes(
             endpoint=self._iot_endpoint,
             cert_bytes=bytes(certificate_pem, "utf-8"),
             pri_key_bytes=bytes(private_key_pem, "utf-8"),
@@ -77,9 +75,9 @@ class Connection:
             on_connection_closed=on_connection_closed,
         )
 
-        self._mqtt_connection.connect().result()
+        mqtt_connection.connect().result()
 
-        return self._mqtt_connection
+        return mqtt_connection
 
     def __create_certificate_from_csr(self, identity):
         accepted_future = Future()
@@ -174,7 +172,7 @@ class Connection:
         return self.__connect(self.thing_name, certificate_pem, private_key_pem)
 
     def connect(self, thing_name):
-        if self._connected:
+        if self._mqtt_connection is not None:
             return self._mqtt_connection
 
         self.thing_name = thing_name
@@ -186,7 +184,11 @@ class Connection:
                 return self.__connectWithClaim()
 
             try:
-                return self.__connect(self.thing_name, certificate_pem, private_key_pem)
+                self._mqtt_connection = self.__connect(
+                    self.thing_name, certificate_pem, private_key_pem
+                )
+
+                return self._mqtt_connection
             except Exception as error:
                 print(error)
 

@@ -49,9 +49,9 @@ def aws_on_command(payload):
 
     def on_open_commissioning_window(message, result, args):
         if check_commissioning_accepted(args):
-            code, *args = result
+            code = result.get("code", None)
 
-            aws_client.publish_command_accepted(
+            code is None or aws_client.publish_command_accepted(
                 uuid,
                 {
                     "code": code,
@@ -104,17 +104,6 @@ def aws_on_command(payload):
                     code=code,
                 )
 
-    elif "commission_on_network" in command:
-        setup_pin_code = payload.get("setupPinCode", None)
-
-        setup_pin_code in None or matter_client.send_message(
-            command,
-            {
-                "setup_pin_code": setup_pin_code,
-            },
-            on_commissioning,
-        )
-
 
 def aws_on_updated(shadow_name, values):
     try:
@@ -160,24 +149,16 @@ def matter_on_initialized():
     )
 
 
-def matter_on_message(message_id, result):
-    if message_id in ["start_listening", "get_nodes", "get_node"]:
-        normalized_nodes = [
-            normalized_node
-            for normalized_node in [
-                matter_normalizer.node_normalize(node) for node in result
-            ]
-            if normalized_node is not None
-        ]
+def matter_normalized_node(normalized_node, force=False):
+    if normalized_node is not None:
+        (
+            node_id,
+            date_commissioned,
+            available,
+            attributes,
+        ) = normalized_node
 
-        for normalized_node in normalized_nodes:
-            (
-                node_id,
-                date_commissioned,
-                available,
-                attributes,
-            ) = normalized_node
-
+        if available or force:
             try:
                 aws_client.update_values(
                     {
@@ -191,6 +172,20 @@ def matter_on_message(message_id, result):
                 print(error)
 
 
+def matter_on_message(message_id, result):
+    if message_id in ["start_listening", "get_nodes", "get_node"]:
+        normalized_nodes = [
+            normalized_node
+            for normalized_node in [
+                matter_normalizer.node_normalize(node) for node in result
+            ]
+            if normalized_node is not None
+        ]
+
+        for normalized_node in normalized_nodes:
+            matter_normalized_node(normalized_node)
+
+
 def matter_on_event(event, data):
     if event == "attribute_updated":
         node_id, *attribute = data
@@ -200,26 +195,11 @@ def matter_on_event(event, data):
                 {"attributes": dict([attribute])},
                 matter_normalizer.shadow_name_from_node_id(node_id),
             )
+
     elif event in ["node_added", "node_updated"]:
         normalized_node = matter_normalizer.node_normalize(data)
 
-        if normalized_node is not None:
-            (
-                node_id,
-                date_commissioned,
-                available,
-                attributes,
-            ) = normalized_node
-
-            if (event == "node_added") or available:
-                aws_client.update_values(
-                    {
-                        "commissionedDate": date_commissioned,
-                        "available": available,
-                        "attributes": attributes,
-                    },
-                    matter_normalizer.shadow_name_from_node_id(node_id),
-                )
+        matter_normalized_node(normalized_node, event == "node_added")
 
     elif event == "node_removed":
         aws_client.remove_values(matter_normalizer.shadow_name_from_node_id(data))
