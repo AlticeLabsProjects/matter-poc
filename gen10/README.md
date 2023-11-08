@@ -101,4 +101,8 @@ cd ~
 wget "https://wiki.rdkcentral.com/download/attachments/254380290/helloworld-test.tgz?version=2&modificationDate=1679780515000&api=v2&download=true" -O helloworld-test.tar.gz
 
 tar vxfz helloworld-test.tar.gz -C dunfell
+
+cd dunfell
+MACHINE=raspberrypi3-rdk-broadband source oe-init-build-env
+bitbake dac-image-helloworld-test
 ```
