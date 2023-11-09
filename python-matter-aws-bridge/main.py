@@ -185,6 +185,20 @@ def matter_on_message(message_id, result):
         for normalized_node in normalized_nodes:
             matter_normalized_node(normalized_node)
 
+            if message_id == "start_listening":
+                (
+                    node_id,
+                    date_commissioned,
+                    available,
+                    attributes,
+                ) = normalized_node
+
+                for attribute in attributes.keys():
+                    matter_client.send_message(
+                        "subscribe_attribute",
+                        {"node_id": node_id, "attribute_path": attribute},
+                    )
+
 
 def matter_on_event(event, data):
     if event == "attribute_updated":
