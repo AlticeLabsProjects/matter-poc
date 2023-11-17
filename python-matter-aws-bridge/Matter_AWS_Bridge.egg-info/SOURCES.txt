@@ -1,0 +1,10 @@
+README.md
+setup.py
+Matter_AWS_Bridge.egg-info/PKG-INFO
+Matter_AWS_Bridge.egg-info/SOURCES.txt
+Matter_AWS_Bridge.egg-info/dependency_links.txt
+Matter_AWS_Bridge.egg-info/entry_points.txt
+Matter_AWS_Bridge.egg-info/requires.txt
+Matter_AWS_Bridge.egg-info/top_level.txt
+src/__init__.py
+src/main.py
