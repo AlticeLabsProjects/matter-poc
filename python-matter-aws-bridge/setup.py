@@ -6,6 +6,7 @@ setup(
     name="Matter AWS Bridge",
     version="1.0",
     packages=find_packages(where="src"),
+    package_dir={"": "src"},
     entry_points={
         "console_scripts": [
             "matterawsbridge=src.main:main",

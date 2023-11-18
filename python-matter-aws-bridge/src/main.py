@@ -1,10 +1,11 @@
 import hashlib
 
-from aws import client as aws
 from dotenv import load_dotenv
-from fgw import client as fgw
-from matter import client as matter
-from matter import normalizer as matter_normalizer
+
+import src.aws.client as aws
+import src.fgw.client as fgw
+import src.matter.client as matter
+import src.matter.normalizer as matter_normalizer
 
 load_dotenv()
 

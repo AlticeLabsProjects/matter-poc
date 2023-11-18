@@ -3,3 +3,7 @@
 **/.venv
 **/.vscode
 python-matter-aws-bridge/certificate/*
+**/build
+**/dist
+**.egg*
+SOURCES.txt

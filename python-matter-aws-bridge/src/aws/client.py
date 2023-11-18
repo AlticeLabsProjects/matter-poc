@@ -4,7 +4,7 @@ from uuid import uuid4
 from awscrt import mqtt
 from awsiot import iotshadow
 
-from .connection import Connection
+from src.aws.connection import Connection
 
 
 class Client(Connection):
