@@ -7,7 +7,7 @@ import requests
 from awscrt import mqtt
 from awsiot import iotidentity, mqtt_connection_builder
 
-from src.aws.certificate import (
+from .certificate import (
     export_certificate_signing_request_to_pem,
     export_private_key_to_pem,
     generate_certificate_signing_request,

@@ -1,11 +1,12 @@
+__all__ = ["aws"]
 import hashlib
 
 from dotenv import load_dotenv
 
-import src.aws.client as aws
-import src.fgw.client as fgw
-import src.matter.client as matter
-import src.matter.normalizer as matter_normalizer
+from .aws.client import Client as AWS
+from .fgw.client import Client as FGW
+from .matter import normalizer as matter_normalizer
+from .matter.client import Client as Matter
 
 load_dotenv()
 
@@ -213,21 +214,13 @@ def main():
         elif event == "node_removed":
             aws_client.remove_values(matter_normalizer.shadow_name_from_node_id(data))
 
-    matter_client = matter.Client(
-        matter_on_initialized, matter_on_message, matter_on_event
-    )
+    matter_client = Matter(matter_on_initialized, matter_on_message, matter_on_event)
 
-    aws_client = aws.Client(
-        aws_on_connected, aws_on_command, aws_on_updated, aws_on_deleted
-    )
+    aws_client = AWS(aws_on_connected, aws_on_command, aws_on_updated, aws_on_deleted)
 
-    fgw_client = fgw.Client(fgw_updated)
+    fgw_client = FGW(fgw_updated)
 
     if not fgw_client.update():
         print("Cannot connect to the FiberGateway")
 
         exit(1)
-
-
-if __name__ == "__main__":
-    main()
