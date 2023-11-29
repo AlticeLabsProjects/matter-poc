@@ -1,4 +1,3 @@
-__all__ = ["aws"]
 import hashlib
 
 from dotenv import load_dotenv
