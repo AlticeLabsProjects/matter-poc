@@ -106,3 +106,77 @@ cd dunfell
 MACHINE=raspberrypi3-rdk-broadband source oe-init-build-env
 bitbake dac-image-helloworld-test
 ```
+# Cross Compile do connectedhomeip
+*(notas soltas)*
+
+Usei os seguintes passos:
+
+Instalei o Ubuntu 22 32 bits no RPI 3 e, lá dentro, instalei as dependências do connectedhomeip para ter disponível as lib todas:
+
+https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/BUILDING.md
+
+```sh
+sudo apt-get install git gcc g++ pkg-config libssl-dev libdbus-1-dev libglib2.0-dev libavahi-client-dev ninja-build python3-venv python3-dev python3-pip unzip libgirepository1.0-dev libcairo2-dev libreadline-dev
+```
+
+Copiei o sysroot para a minha máquina:
+
+https://github.com/project-chip/connectedhomeip/tree/master/integrations/docker/images/stage-1/chip-build-crosscompile
+
+```sh
+mkdir -p rpi3-sysroot/usr/lib
+scp -r rpi3-matter:/lib rpi3-sysroot/ 
+scp -r rpi3-matter:/usr/lib rpi3-sysroot/usr
+scp -r rpi3-matter:/usr/include rpi3-sysroot/usr
+
+tar vcfz rpi3-sysroot.tar.gz rpi3-sysroot
+
+scp rpi3-sysroot.tar.gz yocto-kirkstone:.   
+```
+
+Depois no Ubuntu 22 64 bits
+
+```sh
+tar vxfz rpi3-sysroot.tar.gz
+```
+
+A magia acontece com isto:
+
+```sh
+sudo apt install crossbuild-essential-armhf
+```
+
+Sem a certeza de ser ou não necessário, dentro da pasta do sysroot:
+
+```sh
+ln -s usr/lib/armv7-linux-gnueabihf usr/lib/arm-linux-gnueabihf
+ln -s usr/lib/armv7-linux-gnueabihf usr/include/arm-linux-gnueabihf 
+```
+
+Depois, dentro do connectedhomeip:
+
+```sh
+source scripts/activate.sh
+```
+
+Depois, dentro do chip-tool, connectedhomeip/examples/chip-tool:
+
+```sh
+export PKG_CONFIG_PATH="/home/fafonso/rpi3-sysroot/usr/lib/arm-linux-gnueabihf/pkgconfig"
+
+gn gen out --args='target_cpu="arm" sysroot="/home/fafonso/rpi3-sysroot"'
+
+ninja -C out
+```
+
+Com o binário criado, dentro do out:
+
+```sh
+scp -O chip-tool root@192.168.12.101:.
+```
+
+O -O permite usar OpenSSL em vez de sFTP.
+
+## Notas:
+
+Última versão do ZAP para 32 bits https://github.com/project-chip/zap/releases/tag/v2023.05.04
