@@ -180,3 +180,5 @@ O -O permite usar OpenSSL em vez de sFTP.
 ## Notas:
 
 Última versão do ZAP para 32 bits https://github.com/project-chip/zap/releases/tag/v2023.05.04
+
+Existe um bug parvo no processo de bootstrap: https://github.com/project-chip/connectedhomeip/pull/30987/files
